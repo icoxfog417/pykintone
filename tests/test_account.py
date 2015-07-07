@@ -1,5 +1,5 @@
 import unittest
-import envs
+import tests.envs as envs
 from pykintone.api import Account
 
 

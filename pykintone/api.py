@@ -1,5 +1,7 @@
 import yaml
 import requests
+import json
+import pykintone.result as result
 
 
 class Account():
@@ -58,6 +60,7 @@ class Account():
 
 
 class Kintone():
+    ENCODE = "utf-8"
 
     def __init__(self, apps):
         self.__apps = apps
@@ -92,7 +95,7 @@ class Application():
 
         def encode(user_id, password):
             import base64
-            return base64.b64encode("{0}:{1}".format(user_id, password))
+            return base64.b64encode("{0}:{1}".format(user_id, password).encode(Kintone.ENCODE))
 
         if self.account.basic_id:
             auth = encode(self.account.basic_id, self.account.basic_password)
@@ -106,8 +109,14 @@ class Application():
 
         return header
 
-    def record(self, record_id):
-        url = self.API_ROOT.format(self.account.domain, "record.json")
+    def __single(self):
+        return self.API_ROOT.format(self.account.domain, "record.json")
+
+    def __multiple(self):
+        return self.API_ROOT.format(self.account.domain, "records.json")
+
+    def select_single(self, record_id):
+        url = self.__single()
         headers = self.__make_headers(body=False)
         params = {
             "app": self.app_id,
@@ -115,11 +124,10 @@ class Application():
         }
 
         r = requests.get(url, headers=headers, params=params)
-        content = r.json()
-        return content
+        return result.SelectSingleResult(r)
 
-    def records(self, query="", fields=()):
-        url = self.API_ROOT.format(self.account.domain, "records.json")
+    def select(self, query="", fields=()):
+        url = self.__multiple()
 
         headers = self.__make_headers(body=False)
         params = {
@@ -133,9 +141,109 @@ class Application():
             params["fields"] = fields
 
         r = requests.get(url, headers=headers, params=params)
-        content = r.json()
+        return result.SelectResult(r)
 
-        return content
+    def create_single(self, record):
+        url = self.__single()
+        headers = self.__make_headers()
+
+        data = {
+            "app": self.app_id,
+            "record": record
+        }
+
+        resp = requests.post(url, headers=headers, data=json.dumps(data))
+        r = result.CreateSingleResult(resp)
+
+        return r
+
+    def create(self, records):
+        url = self.__multiple()
+        headers = self.__make_headers()
+
+        data = {
+            "app": self.app_id,
+            "records": records
+        }
+
+        resp = requests.post(url, headers=headers, data=json.dumps(data))
+        r = result.CreateResult(resp)
+
+        return r
+
+    def update_single(self, record, record_id, revision=-1):
+        url = self.__single()
+        headers = self.__make_headers()
+
+        data = {
+            "app": self.app_id,
+            "id": record_id,
+            "record": record
+        }
+
+        if revision > 0:
+            data["revision"] = revision
+
+        resp = requests.put(url, headers=headers, data=json.dumps(data))
+        r = result.UpdateSingleResult(resp)
+
+        return r
+
+    def update(self, records):
+        url = self.__multiple()
+        headers = self.__make_headers()
+        _records = []
+
+        for r in records:
+            r_id = -1
+            r_rv = -1
+            r_dict = {}
+
+            for k in r:
+                if k == "id" or k == "$id":
+                    r_id = r[k]
+                elif k == "revision" or k == "$revision":
+                    r_rv = r[k]
+                else:
+                    r_dict[k] = r[k]
+
+            _records.append({
+                "id": r_id,
+                "revision": r_rv,
+                "record": r_dict
+            })
+
+        data = {
+            "app": self.app_id,
+            "records": _records
+        }
+
+        resp = requests.put(url, headers=headers, data=json.dumps(data))
+        r = result.UpdateResult(resp)
+
+        return r
+
+    def delete(self, record_ids, revisions=()):
+        url = self.__multiple()
+        headers = self.__make_headers()
+        ids = record_ids
+        if not isinstance(ids, (list, tuple)):
+            ids = [record_ids]
+
+        data = {
+            "app": self.app_id,
+            "ids": ids
+        }
+
+        if len(revisions) > 0:
+            if len(revisions) != len(record_ids):
+                raise Exception("when delete, the size of ids and revision have to be equal.")
+            data["revisions"] = revisions
+
+        resp = requests.delete(url, headers=headers, data=json.dumps(data))
+        r = result.Result(resp)
+
+        return r
 
     def __str__(self):
         info = str(self.account)
