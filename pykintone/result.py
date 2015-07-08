@@ -42,16 +42,6 @@ class CreateSingleResult(Result):
             self.key = RecordKey(int(_key["id"]), int(_key["revision"]))
 
 
-class UpdateSingleResult(Result):
-
-    def __init__(self, response):
-        super(UpdateSingleResult, self).__init__(response)
-        self.revision = -1
-        if self.ok:
-            _info = response.json()
-            self.revision = int(_info["revision"])
-
-
 class CreateResult(Result):
 
     def __init__(self, response):
@@ -62,6 +52,16 @@ class CreateResult(Result):
             for i, r_id in enumerate(_keys["ids"]):
                 k = RecordKey(int(_keys["ids"][i]), int(_keys["revisions"][i]))
                 self.keys.append(k)
+
+
+class UpdateSingleResult(Result):
+
+    def __init__(self, response):
+        super(UpdateSingleResult, self).__init__(response)
+        self.revision = -1
+        if self.ok:
+            _info = response.json()
+            self.revision = int(_info["revision"])
 
 
 class UpdateResult(Result):

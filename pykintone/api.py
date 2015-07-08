@@ -39,16 +39,16 @@ class Account():
                 args[k + "_password"] = account_dict[k]["password"]
 
         account = Account(**args)
+        kintone = Kintone(account)
 
         # load kintone apps
         apps = []
         for name in account_dict["apps"]:
             _a = account_dict["apps"][name]
             token = "" if "token" not in _a else _a["token"]
-            app = Application(account, int(_a["id"]), token, name)
-            apps.append(app)
+            kintone.app(int(_a["id"]), token, name)
 
-        return Kintone(apps)
+        return kintone
 
     def __str__(self):
         infos = []
@@ -62,18 +62,25 @@ class Account():
 class Kintone():
     ENCODE = "utf-8"
 
-    def __init__(self, apps):
-        self.__apps = apps
+    def __init__(self, account):
+        self.account = account
+        self.__apps = []
 
     def __len__(self):
         return len(self.__apps)
 
-    def app(self, app_id=-1):
+    def app(self, app_id=-1, api_token="", app_name=""):
         if app_id < 0:
             return self.__apps[0]
         else:
-            a = [a for a in self.__apps if a.app_id == app_id]
-            return a
+            existed = [a for a in self.__apps if a.app_id == app_id]
+            # register if not exist
+            if len(existed) > 0:
+                return existed[0]
+            else:
+                _a = Application(self.account, app_id, api_token, app_name)
+                self.__apps.append(_a)
+                return _a
 
 
 class Application():
@@ -237,7 +244,7 @@ class Application():
 
         if len(revisions) > 0:
             if len(revisions) != len(record_ids):
-                raise Exception("when delete, the size of ids and revision have to be equal.")
+                raise Exception("when deleting, the size of ids have to be equal to revisions.")
             data["revisions"] = revisions
 
         resp = requests.delete(url, headers=headers, data=json.dumps(data))
