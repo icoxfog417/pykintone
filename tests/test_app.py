@@ -10,9 +10,9 @@ class TestApp(unittest.TestCase):
         app = pykintone.load(envs.FILE_PATH).app()
         result = app.select()
         self.assertTrue(result.ok)
-        self.assertTrue("records" in result.records and len(result.records["records"]) > 0)
+        self.assertTrue(len(result.records) > 0)
 
-        record_id = result.records["records"][0]["$id"]["value"]
+        record_id = result.records[0]["$id"]["value"]
         result = app.select_single(record_id)
         self.assertTrue(result.ok)
         print(result.record)

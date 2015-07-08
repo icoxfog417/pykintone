@@ -1,4 +1,5 @@
 from collections import namedtuple
+from pykintone.model import KintoneModel
 
 
 class Result():
@@ -19,6 +20,9 @@ class SelectSingleResult(Result):
         if self.ok:
             self.record = response.json()
 
+    def model(self, model_type):
+        return KintoneModel.json_to_model(self.record, model_type)
+
 
 class SelectResult(Result):
 
@@ -26,8 +30,13 @@ class SelectResult(Result):
         super(SelectResult, self).__init__(response)
         self.records = []
         if self.ok:
-            self.records = response.json()
+            serialized = response.json()
+            if "records" in serialized:
+                self.records = serialized["records"]
 
+    def models(self, model_type):
+        ms = [KintoneModel.json_to_model(r, model_type) for r in self.records]
+        return ms
 
 RecordKey = namedtuple("RecordInfo", ["record_id", "revision"])
 
