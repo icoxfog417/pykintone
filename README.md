@@ -19,6 +19,8 @@ if r.ok:
 
 ## Installation
 
+You can download from [pypi](https://pypi.python.org/pypi/pykintone).
+
 ```
 pip install pykintone
 ```
