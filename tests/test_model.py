@@ -45,3 +45,39 @@ class TestModel(unittest.TestCase):
         app.delete(updated)
         deleted = app.get(result.record_id).model(TestAppModel)
         self.assertFalse(deleted)
+
+    def test_models(self):
+        app = pykintone.load(envs.FILE_PATH).app()
+        keyword = "models_test"
+        select_models = lambda : app.select("stringField = \"{0}\"".format(keyword)).models(TestAppModel)
+
+        # initialize model
+        ms = []
+        for i in range(2):
+            m = TestAppModel()
+            m.my_key = "model_test_{0}".format(i)
+            m.stringField = keyword
+            m.numberField = i
+            ms.append(m)
+
+        # create model
+        result = app.batch_create(ms)
+        self.assertTrue(result.ok)
+
+        # get model
+        createds = select_models()
+
+        # update model
+        for i, m in enumerate(createds):
+            m.numberField = i + 1
+        app.batch_update(createds)
+
+        updateds = select_models()
+        for i, m in enumerate(createds):
+            self.assertEqual(i + 1, m.numberField)
+
+        # delete model
+        app.delete(updateds)
+        deleted = select_models()
+        self.assertEqual(0, len(deleted))
+

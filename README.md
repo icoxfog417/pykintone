@@ -17,6 +17,30 @@ if r.ok:
 * update
 * delete
 
+* object/record mapping
+
+```
+import pykintone
+from pykintone import model
+
+
+class Person(model.KintoneModel):
+
+    def __init__(self):
+        super().__init__()
+        self.last_name = ""
+        self.first_name = ""
+
+
+app = pykintone.load("path_to_account_setting").app()
+persons = app.select().models(Person)
+
+someone = persons[0]
+someone.last_name = "xxx"
+app.update(someone)
+
+```
+
 ## Installation
 
 You can download from [pypi](https://pypi.python.org/pypi/pykintone).

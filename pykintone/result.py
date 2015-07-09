@@ -37,6 +37,7 @@ class SelectResult(Result):
 
     def models(self, model_type):
         ms = [model_type.record_to_model(r) for r in self.records]
+        ms = [m for m in ms if m]
         return ms
 
 RecordKey = namedtuple("RecordKey", ["record_id", "revision"])
