@@ -12,12 +12,14 @@ if r.ok:
 
 ## Feature
 
+**Basic operation**
+
 * create
 * read
 * update
 * delete
 
-* object/record mapping
+**Record and model mapping**
 
 ```python
 import pykintone
