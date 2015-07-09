@@ -19,7 +19,7 @@ if r.ok:
 
 * object/record mapping
 
-```
+```python
 import pykintone
 from pykintone import model
 
@@ -53,3 +53,28 @@ pip install pykintone
 
 * [PyYAML](http://pyyaml.org/wiki/PyYAML)
 * [requests](http://docs.python-requests.org/en/latest/)
+
+You can write account setting file as below (yaml format).
+
+```
+domain: xxx
+login:
+    id: user_id
+    password: password
+basic:
+    id: basic_id
+    password: password
+apps:
+    test:
+        id: 1
+```
+
+Of course you can use api_token. 
+
+```
+domain: xxx
+apps:
+    test:
+        id: 1
+        api_token: xxxx
+```
