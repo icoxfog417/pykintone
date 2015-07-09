@@ -80,3 +80,7 @@ apps:
         id: 1
         api_token: xxxx
 ```
+
+## Test
+
+You have to create test application on kintone, and you can use `tests/pykintoneTest.zip` (application template) to do it.
