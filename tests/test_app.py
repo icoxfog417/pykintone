@@ -13,7 +13,7 @@ class TestApp(unittest.TestCase):
         self.assertTrue(len(result.records) > 0)
 
         record_id = result.records[0]["$id"]["value"]
-        result = app.select_single(record_id)
+        result = app.get(record_id)
         self.assertTrue(result.ok)
         print(result.record)
 
@@ -30,29 +30,33 @@ class TestApp(unittest.TestCase):
         }
 
         # create
-        result = app.create_single(record)
+        result = app.create(record)
         self.assertTrue(result.ok)
 
         record_id = result.key.record_id
         first_revision = result.key.revision
-        created = app.select_single(record_id)
+        created = app.get(record_id)
         self.assertTrue(created.ok)
 
         # update
-        update_content = {
+        update = {
+            "id": record_id,
+            "revision": result.key.revision,
             "radio": {
                 "value": "radio2"
             }
         }
-        result = app.update_single(update_content, record_id, result.key.revision)
+        result = app.update(update)
         self.assertTrue(result.ok)
         self.assertTrue(first_revision < result.revision)
+        updated = app.get(record_id).record
+        self.assertTrue("redio2", updated["radio"]["value"])
 
         # delete
         result = app.delete(record_id)
         self.assertTrue(result.ok)
 
-    def test_multiple(self):
+    def test_batch(self):
         app = pykintone.load(envs.FILE_PATH).app()
 
         records = [
@@ -75,7 +79,7 @@ class TestApp(unittest.TestCase):
         ]
 
         # create
-        result = app.create(records)
+        result = app.batch_create(records)
         self.assertTrue(result.ok)
 
         record_keys = result.keys
@@ -85,7 +89,7 @@ class TestApp(unittest.TestCase):
         self.assertTrue(created.ok)
 
         # update
-        update_content = [
+        updates = [
             {
                 "id": record_keys[0].record_id,
                 "revision": record_keys[0].revision,
@@ -101,7 +105,7 @@ class TestApp(unittest.TestCase):
                 }
             }
         ]
-        result = app.update(update_content)
+        result = app.batch_update(updates)
         self.assertTrue(result.ok)
         for r in result.keys:
             prev = [k for k in record_keys if k.record_id == r.record_id]

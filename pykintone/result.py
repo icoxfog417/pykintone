@@ -1,5 +1,4 @@
 from collections import namedtuple
-from pykintone.model import KintoneModel
 
 
 class Result():
@@ -18,10 +17,12 @@ class SelectSingleResult(Result):
         super(SelectSingleResult, self).__init__(response)
         self.record = {}
         if self.ok:
-            self.record = response.json()
+            serialized = response.json()
+            if "record" in serialized:
+                self.record = serialized["record"]
 
     def model(self, model_type):
-        return KintoneModel.json_to_model(self.record, model_type)
+        return model_type.record_to_model(self.record)
 
 
 class SelectResult(Result):
@@ -35,26 +36,28 @@ class SelectResult(Result):
                 self.records = serialized["records"]
 
     def models(self, model_type):
-        ms = [KintoneModel.json_to_model(r, model_type) for r in self.records]
+        ms = [model_type.record_to_model(r) for r in self.records]
         return ms
 
-RecordKey = namedtuple("RecordInfo", ["record_id", "revision"])
-
-
-class CreateSingleResult(Result):
-
-    def __init__(self, response):
-        super(CreateSingleResult, self).__init__(response)
-        self.key = {}
-        if self.ok:
-            _key = response.json()
-            self.key = RecordKey(int(_key["id"]), int(_key["revision"]))
+RecordKey = namedtuple("RecordKey", ["record_id", "revision"])
 
 
 class CreateResult(Result):
 
     def __init__(self, response):
         super(CreateResult, self).__init__(response)
+        self.record_id = -1
+        self.revision = -1
+        if self.ok:
+            _key = response.json()
+            self.record_id = int(_key["id"])
+            self.revision = int(_key["revision"])
+
+
+class BatchCreateResult(Result):
+
+    def __init__(self, response):
+        super(BatchCreateResult, self).__init__(response)
         self.keys = []
         if self.ok:
             _keys = response.json()
@@ -63,20 +66,20 @@ class CreateResult(Result):
                 self.keys.append(k)
 
 
-class UpdateSingleResult(Result):
+class UpdateResult(Result):
 
     def __init__(self, response):
-        super(UpdateSingleResult, self).__init__(response)
+        super(UpdateResult, self).__init__(response)
         self.revision = -1
         if self.ok:
             _info = response.json()
             self.revision = int(_info["revision"])
 
 
-class UpdateResult(Result):
+class BatchUpdateResult(Result):
 
     def __init__(self, response):
-        super(UpdateResult, self).__init__(response)
+        super(BatchUpdateResult, self).__init__(response)
         self.keys = []
         if self.ok:
             _keys = response.json()

@@ -1,7 +1,7 @@
 import yaml
 import requests
 import json
-import pykintone.result as result
+import pykintone.result as pykr
 
 
 class Account():
@@ -122,7 +122,13 @@ class Application():
     def __multiple(self):
         return self.API_ROOT.format(self.account.domain, "records.json")
 
-    def select_single(self, record_id):
+    def __is_record_id(self, field_name):
+        return True if field_name in ["id", "$id"] else False
+
+    def __is_revision(self, field_name):
+        return True if field_name in ["revision", "$revision"] else False
+
+    def get(self, record_id):
         url = self.__single()
         headers = self.__make_headers(body=False)
         params = {
@@ -131,7 +137,7 @@ class Application():
         }
 
         r = requests.get(url, headers=headers, params=params)
-        return result.SelectSingleResult(r)
+        return pykr.SelectSingleResult(r)
 
     def select(self, query="", fields=()):
         url = self.__multiple()
@@ -148,77 +154,95 @@ class Application():
             params["fields"] = fields
 
         r = requests.get(url, headers=headers, params=params)
-        return result.SelectResult(r)
+        return pykr.SelectResult(r)
 
-    def create_single(self, record):
+    def __get_model_type(self, instance):
+        import pykintone.model as pykm
+        if isinstance(instance, pykm.KintoneModel):
+            return instance.__class__
+        else:
+            return None
+
+    def __to_create_format(self, record_or_model):
+        formatted = {}
+        record = record_or_model
+        if self.__get_model_type(record_or_model):
+            record = record_or_model.to_record()
+
+        for k in record:
+            if self.__is_record_id(k) or self.__is_revision(k):
+                continue
+            else:
+                formatted[k] = {
+                    "value": record[k]
+                }
+
+        return formatted
+
+    def create(self, record_or_model):
         url = self.__single()
         headers = self.__make_headers()
+        _record = self.__to_create_format(record_or_model)
 
         data = {
             "app": self.app_id,
-            "record": record
+            "record": _record
         }
 
         resp = requests.post(url, headers=headers, data=json.dumps(data))
-        r = result.CreateSingleResult(resp)
+        r = pykr.CreateResult(resp)
 
         return r
 
-    def create(self, records):
+    def batch_create(self, records_or_models):
         url = self.__multiple()
         headers = self.__make_headers()
+        _records = [self.__to_create_format(r) for r in records_or_models]
 
         data = {
             "app": self.app_id,
-            "records": records
+            "records": _records
         }
 
         resp = requests.post(url, headers=headers, data=json.dumps(data))
-        r = result.CreateResult(resp)
+        r = pykr.BatchCreateResult(resp)
 
         return r
 
-    def update_single(self, record, record_id, revision=-1):
+    def __to_update_format(self, record_or_model):
+        formatted = {"id": -1, "revision": -1, "record": {}}
+        record = record_or_model
+        if self.__get_model_type(record_or_model):
+            record = record_or_model.to_record()
+
+        for k in record:
+            if self.__is_record_id(k) and record[k] >= 0:
+                formatted["id"] = record[k]
+            elif self.__is_revision(k) and record[k] >= 0:
+                formatted["revision"] = record[k]
+            else:
+                formatted["record"][k] = {
+                    "value": record[k]
+                }
+
+        return formatted
+
+    def update(self, record_or_model):
         url = self.__single()
         headers = self.__make_headers()
 
-        data = {
-            "app": self.app_id,
-            "id": record_id,
-            "record": record
-        }
-
-        if revision > 0:
-            data["revision"] = revision
+        data = self.__to_update_format(record_or_model)
+        data["app"] = self.app_id
 
         resp = requests.put(url, headers=headers, data=json.dumps(data))
-        r = result.UpdateSingleResult(resp)
+        r = pykr.UpdateResult(resp)
 
         return r
 
-    def update(self, records):
+    def batch_update(self, records_or_models):
         url = self.__multiple()
         headers = self.__make_headers()
-        _records = []
-
-        for r in records:
-            r_id = -1
-            r_rv = -1
-            r_dict = {}
-
-            for k in r:
-                if k == "id" or k == "$id":
-                    r_id = r[k]
-                elif k == "revision" or k == "$revision":
-                    r_rv = r[k]
-                else:
-                    r_dict[k] = r[k]
-
-            _records.append({
-                "id": r_id,
-                "revision": r_rv,
-                "record": r_dict
-            })
+        _records = [self.__to_update_format(r) for r in records_or_models]
 
         data = {
             "app": self.app_id,
@@ -226,29 +250,58 @@ class Application():
         }
 
         resp = requests.put(url, headers=headers, data=json.dumps(data))
-        r = result.UpdateResult(resp)
+        r = pykr.BatchUpdateResult(resp)
 
         return r
 
-    def delete(self, record_ids, revisions=()):
+    def delete(self, record_ids_or_models, revisions=()):
         url = self.__multiple()
         headers = self.__make_headers()
-        ids = record_ids
-        if not isinstance(ids, (list, tuple)):
-            ids = [record_ids]
 
         data = {
             "app": self.app_id,
-            "ids": ids
-        }
+            }
 
-        if len(revisions) > 0:
-            if len(revisions) != len(record_ids):
+        ids = []
+        revs = []
+
+        if isinstance(revisions, (list, tuple)):
+            if len(revisions) > 0:
+                revs = [int(r) for r in revisions]
+        else:
+            revs = [int(revisions)]
+
+        def to_key(id_or_m):
+            if self.__get_model_type(id_or_m):
+                return id_or_m.record_id, id_or_m.revision
+            else:
+                return int(id_or_m), -1
+
+        def append_key(key):
+            for i, k in enumerate(key):
+                if k >= 0:
+                    if i == 0:
+                        ids.append(k)
+                    else:
+                        revs.append(k)
+
+        if isinstance(record_ids_or_models, (list, tuple)):
+            for i in record_ids_or_models:
+                append_key(to_key(i))
+        else:
+            append_key(to_key(record_ids_or_models))
+
+        if len(revs) > 0:
+            if len(revs) != len(ids):
                 raise Exception("when deleting, the size of ids have to be equal to revisions.")
-            data["revisions"] = revisions
+            else:
+                data["ids"] = ids
+                data["revisions"] = revisions
+        else:
+            data["ids"] = ids
 
         resp = requests.delete(url, headers=headers, data=json.dumps(data))
-        r = result.Result(resp)
+        r = pykr.Result(resp)
 
         return r
 
