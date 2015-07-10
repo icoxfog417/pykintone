@@ -114,6 +114,5 @@ class kintoneService():
     def datetime_to_value(cls, dt):
         local = dt.replace(tzinfo=cls.__TIME_ZONE)
         utc = local.astimezone(pytz.utc)
-        value = utc.strftime(cls.DATETIME_FORMAT.replace("Z", "%z"))
-        value = value[:-2] + ":" + value[-2:]  # insert : between timezone hours and minutes
+        value = utc.strftime(cls.DATETIME_FORMAT)
         return value

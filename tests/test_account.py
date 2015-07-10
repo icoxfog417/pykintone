@@ -30,8 +30,8 @@ class TestService(unittest.TestCase):
     def test_datetime_to_value(self):
         from datetime import datetime
         import pytz
-        utc = datetime.utcnow().replace(tzinfo=pytz.UTC).strftime("%Y-%m-%dT%H%M%S%z")
+        utc = datetime.utcnow().replace(tzinfo=pytz.UTC).strftime(kintoneService.DATETIME_FORMAT)
         local = datetime.now()
 
         utced = kintoneService.datetime_to_value(local)
-        self.assertEqual(utc, utced.replace(":", ""))
+        self.assertEqual(utc, utced)

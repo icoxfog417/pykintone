@@ -3,7 +3,7 @@ from datetime import datetime
 import tests.envs as envs
 import pykintone
 from pykintone.model import kintoneModel
-from pykintone.model import FieldType
+from pykintone.model import PropertyDetail, FieldType
 
 
 class TestAppModel(kintoneModel):
@@ -19,11 +19,28 @@ class TestAppModel(kintoneModel):
         self.time = datetime.now()
         self.datetimeField = datetime.now()
         self.user_select = None
+        self.created_time = None
+        self.updated_time = None
+        self.creator = None
+        self.modifier = None
+        self.changeLogs = []
 
-        self._field_types["time"] = FieldType.TIME
-        self._field_types["datetimeField"] = FieldType.DATETIME
-        self._field_types["user_select"] = FieldType.USER_SELECT
+        self._property_details.append(PropertyDetail("time", FieldType.TIME))
+        self._property_details.append(PropertyDetail("datetimeField", FieldType.DATETIME))
+        self._property_details.append(PropertyDetail("user_select", FieldType.USER_SELECT))
+        self._property_details.append(PropertyDetail("created_time", FieldType.CREATED_TIME, field_name="作成日時", unsent=True))
+        self._property_details.append(PropertyDetail("updated_time", FieldType.UPDATED_TIME, field_name="更新日時", unsent=True))
+        self._property_details.append(PropertyDetail("creator", FieldType.CREATOR, field_name="作成者", unsent=True))
+        self._property_details.append(PropertyDetail("modifier", FieldType.MODIFIER, field_name="更新者", unsent=True))
+        self._property_details.append(PropertyDetail("changeLogs", FieldType.SUBTABLE, sub_type=History))
 
+class History(kintoneModel):
+
+    def __init__(self, desc="", ymd=None):
+        super().__init__()
+        self.changeYMD = datetime.now() if not ymd else ymd
+        self.historyDesc = desc
+        self._property_details.append(PropertyDetail("changeYMD", FieldType.DATETIME))
 
 class TestModel(unittest.TestCase):
 
@@ -37,6 +54,7 @@ class TestModel(unittest.TestCase):
         model.numberField = 1
         model.radio = "radio1"
         model.checkbox = ["check2"]
+        model.changeLogs.append(History("initialized"))
 
         # create model
         result = app.create(model)
@@ -47,9 +65,14 @@ class TestModel(unittest.TestCase):
 
         # update model
         created.stringField = "model_updated"
+        created.changeLogs[0].historyDesc = "updated"
+        created.changeLogs.append(History("added"))
         app.update(created)
         updated = app.get(result.record_id).model(TestAppModel)
-        self.assertEqual("model_updated", updated.stringField)
+        self.assertEqual(created.stringField, updated.stringField)
+        self.assertEqual(2, len(updated.changeLogs))
+        for i, c in enumerate(created.changeLogs):
+            self.assertEqual(c.historyDesc, updated.changeLogs[i].historyDesc)
 
         # delete model
         app.delete(updated)
@@ -90,4 +113,3 @@ class TestModel(unittest.TestCase):
         app.delete(updateds)
         deleted = select_models()
         self.assertEqual(0, len(deleted))
-
