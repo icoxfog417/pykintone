@@ -1,86 +1,7 @@
-import yaml
 import requests
 import json
+from pykintone.account import kintoneService
 import pykintone.result as pykr
-
-
-class Account():
-
-    def __init__(self, domain,
-                 login_id="", login_password="",
-                 basic_id="", basic_password=""):
-        self.domain = domain
-        self.login_id = login_id
-        self.login_password = login_password
-        self.basic_id = basic_id
-        self.basic_password = basic_password
-
-    @classmethod
-    def load(cls, path):
-        apps = None
-
-        with open(path, "rb") as f:
-            a_dict = yaml.load(f)
-            apps = cls.loads(a_dict)
-
-        return apps
-
-    @classmethod
-    def loads(cls, account_dict):
-        account = None
-
-        # create account
-        args = {
-            "domain": account_dict["domain"]
-        }
-        for k in ["login", "basic"]:
-            if k in account_dict:
-                args[k + "_id"] = account_dict[k]["id"]
-                args[k + "_password"] = account_dict[k]["password"]
-
-        account = Account(**args)
-        kintone = Kintone(account)
-
-        # load kintone apps
-        apps = []
-        for name in account_dict["apps"]:
-            _a = account_dict["apps"][name]
-            token = "" if "token" not in _a else _a["token"]
-            kintone.app(int(_a["id"]), token, name)
-
-        return kintone
-
-    def __str__(self):
-        infos = []
-        infos.append("domain:\t {0}".format(self.domain))
-        infos.append("login:\t {0} / {1}".format(self.login_id, self.login_password))
-        infos.append("basic:\t {0} / {1}".format(self.basic_id, self.basic_password))
-
-        return "\n".join(infos)
-
-
-class Kintone():
-    ENCODE = "utf-8"
-
-    def __init__(self, account):
-        self.account = account
-        self.__apps = []
-
-    def __len__(self):
-        return len(self.__apps)
-
-    def app(self, app_id=-1, api_token="", app_name=""):
-        if app_id < 0:
-            return self.__apps[0]
-        else:
-            existed = [a for a in self.__apps if a.app_id == app_id]
-            # register if not exist
-            if len(existed) > 0:
-                return existed[0]
-            else:
-                _a = Application(self.account, app_id, api_token, app_name)
-                self.__apps.append(_a)
-                return _a
 
 
 class Application():
@@ -102,7 +23,7 @@ class Application():
 
         def encode(user_id, password):
             import base64
-            return base64.b64encode("{0}:{1}".format(user_id, password).encode(Kintone.ENCODE))
+            return base64.b64encode("{0}:{1}".format(user_id, password).encode(kintoneService.ENCODE))
 
         if self.account.basic_id:
             auth = encode(self.account.basic_id, self.account.basic_password)
@@ -173,9 +94,7 @@ class Application():
             if self.__is_record_id(k) or self.__is_revision(k):
                 continue
             else:
-                formatted[k] = {
-                    "value": record[k]
-                }
+                formatted[k] = record[k]
 
         return formatted
 
@@ -216,14 +135,13 @@ class Application():
             record = record_or_model.to_record()
 
         for k in record:
-            if self.__is_record_id(k) and record[k] >= 0:
-                formatted["id"] = record[k]
-            elif self.__is_revision(k) and record[k] >= 0:
-                formatted["revision"] = record[k]
+            value = record[k]["value"]
+            if self.__is_record_id(k) and value >= 0:
+                formatted["id"] = value
+            elif self.__is_revision(k) and value >= 0:
+                formatted["revision"] = value
             else:
-                formatted["record"][k] = {
-                    "value": record[k]
-                }
+                formatted["record"][k] = record[k]
 
         return formatted
 

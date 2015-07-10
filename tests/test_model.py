@@ -1,10 +1,12 @@
 import unittest
+from datetime import datetime
 import tests.envs as envs
 import pykintone
-from pykintone import model
+from pykintone.model import kintoneModel
+from pykintone.model import FieldType
 
 
-class TestAppModel(model.kintoneModel):
+class TestAppModel(kintoneModel):
 
     def __init__(self):
         super().__init__()
@@ -13,6 +15,14 @@ class TestAppModel(model.kintoneModel):
         self.numberField = 0
         self.radio = ""
         self.checkbox = []
+        self.dateField = datetime.now()
+        self.time = datetime.now()
+        self.datetimeField = datetime.now()
+        self.user_select = None
+
+        self._field_types["time"] = FieldType.TIME
+        self._field_types["datetimeField"] = FieldType.DATETIME
+        self._field_types["user_select"] = FieldType.USER_SELECT
 
 
 class TestModel(unittest.TestCase):

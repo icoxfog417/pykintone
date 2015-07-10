@@ -7,7 +7,7 @@ setup(
         'PyYAML',
         'requests'
     ],
-    version='0.1.0',
+    version='0.1.1',
     description='Python library to access kintone',
     author='icoxfog417',
     author_email='icoxfog417@yahoo.co.jp',

@@ -5,7 +5,7 @@ Python library to access [kintone](https://kintone.cybozu.com).
 ```python
 import pykintone
 
-r = pykintone.app("kintone domain", "app id", "app token").select("updated_time > NOW()")
+r = pykintone.app("kintone domain", "app id", "api token").select("updated_time > NOW()")
 if r.ok:
     records = r.records
 ```

@@ -1,4 +1,4 @@
-from pykintone.api import Account, Kintone
+from pykintone.account import Account, kintoneService
 
 
 def load(path):
@@ -14,11 +14,11 @@ def login(domain,
                       login_id, login_password,
                       basic_id, basic_password)
 
-    kintone = Kintone(account)
+    kintone = kintoneService(account)
 
     return kintone
 
 
 def app(domain, app_id, api_token, app_name=""):
-    kintone = Kintone(Account(domain))
+    kintone = kintoneService(Account(domain))
     return kintone.app(app_id, api_token, app_name)

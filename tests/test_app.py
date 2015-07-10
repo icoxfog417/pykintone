@@ -33,15 +33,19 @@ class TestApp(unittest.TestCase):
         result = app.create(record)
         self.assertTrue(result.ok)
 
-        record_id = result.key.record_id
-        first_revision = result.key.revision
+        record_id = result.record_id
+        first_revision = result.revision
         created = app.get(record_id)
         self.assertTrue(created.ok)
 
         # update
         update = {
-            "id": record_id,
-            "revision": result.key.revision,
+            "$id": {
+                "value": record_id
+            },
+            "$revision": {
+                "value": result.revision
+            },
             "radio": {
                 "value": "radio2"
             }
@@ -91,15 +95,23 @@ class TestApp(unittest.TestCase):
         # update
         updates = [
             {
-                "id": record_keys[0].record_id,
-                "revision": record_keys[0].revision,
+                "$id": {
+                    "value": record_keys[0].record_id
+                },
+                "$revision": {
+                    "value": record_keys[0].revision
+                },
                 "radio": {
                     "value": "radio2"
                 }
             },
             {
-                "id": record_keys[1].record_id,
-                "revision": record_keys[1].revision,
+                "$id": {
+                    "value": record_keys[1].record_id
+                },
+                "$revision": {
+                    "value": record_keys[1].revision
+                },
                 "radio": {
                     "value": "radio1"
                 }
