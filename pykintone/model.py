@@ -1,7 +1,8 @@
 import inspect
+from enum import Enum
 
 
-class KintoneModel():
+class kintoneModel():
 
     def __init__(self):
         self.record_id = -1
@@ -50,4 +51,3 @@ class KintoneModel():
         names = [f[0] for f in public_fields]
 
         return names
-

@@ -4,7 +4,7 @@ import pykintone
 from pykintone import model
 
 
-class TestAppModel(model.KintoneModel):
+class TestAppModel(model.kintoneModel):
 
     def __init__(self):
         super().__init__()

@@ -158,7 +158,7 @@ class Application():
 
     def __get_model_type(self, instance):
         import pykintone.model as pykm
-        if isinstance(instance, pykm.KintoneModel):
+        if isinstance(instance, pykm.kintoneModel):
             return instance.__class__
         else:
             return None
