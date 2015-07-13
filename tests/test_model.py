@@ -34,6 +34,7 @@ class TestAppModel(kintoneModel):
         self._property_details.append(PropertyDetail("modifier", FieldType.MODIFIER, field_name="更新者", unsent=True))
         self._property_details.append(PropertyDetail("changeLogs", FieldType.SUBTABLE, sub_type=History))
 
+
 class History(kintoneModel):
 
     def __init__(self, desc="", ymd=None):
@@ -41,6 +42,7 @@ class History(kintoneModel):
         self.changeYMD = datetime.now() if not ymd else ymd
         self.historyDesc = desc
         self._property_details.append(PropertyDetail("changeYMD", FieldType.DATETIME))
+
 
 class TestModel(unittest.TestCase):
 

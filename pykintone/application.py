@@ -63,18 +63,19 @@ class Application():
     def select(self, query="", fields=()):
         url = self.__multiple()
 
-        headers = self.__make_headers(body=False)
-        params = {
+        headers = self.__make_headers()
+        headers["X-HTTP-Method-Override"] = "GET"  # use post to get
+        data = {
             "app": self.app_id
         }
 
         if query:
-            params["query"] = query
+            data["query"] = query
 
         if len(fields) > 0:
-            params["fields"] = fields
+            data["fields"] = fields
 
-        r = requests.get(url, headers=headers, params=params)
+        r = requests.post(url, headers=headers, data=json.dumps(data))
         return pykr.SelectResult(r)
 
     def __get_model_type(self, instance):
