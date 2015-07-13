@@ -127,3 +127,16 @@ class TestApp(unittest.TestCase):
         # delete
         result = app.delete(ids)
         self.assertTrue(result.ok)
+
+    def test_error(self):
+        app = pykintone.load(envs.FILE_PATH).app()
+
+        record = {
+            "radio": {
+                "value": "xxxxx"
+            }
+        }
+
+        # create (will be error)
+        result = app.create(record)
+        self.assertFalse(result.ok)

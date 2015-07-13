@@ -66,7 +66,8 @@ class Application():
         headers = self.__make_headers()
         headers["X-HTTP-Method-Override"] = "GET"  # use post to get
         data = {
-            "app": self.app_id
+            "app": self.app_id,
+            "totalCount": True
         }
 
         if query:

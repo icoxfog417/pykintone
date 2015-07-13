@@ -1,14 +1,21 @@
 from collections import namedtuple
 
 
+Error = namedtuple("Error", ["message", "id", "code"])
+
+
 class Result():
 
     def __init__(self, response):
         self.ok = response.ok
         self.message = ""
+        self.error = None
         if not self.ok:
-            self.error = response.json()
-            self.message = self.error["message"]
+            _e = response.json()
+            self.error = Error(_e["message"], _e["id"], _e["code"])
+            self.detail = {}
+            if "errors" in _e:
+                self.detail = _e["errors"]
 
 
 class SelectSingleResult(Result):
@@ -30,15 +37,19 @@ class SelectResult(Result):
     def __init__(self, response):
         super(SelectResult, self).__init__(response)
         self.records = []
+        self.total_count = 0
         if self.ok:
             serialized = response.json()
             if "records" in serialized:
                 self.records = serialized["records"]
+            if "totalCount" in serialized:
+                self.total_count = int(serialized["totalCount"])
 
     def models(self, model_type):
         ms = [model_type.record_to_model(r) for r in self.records]
         ms = [m for m in ms if m]
         return ms
+
 
 RecordKey = namedtuple("RecordKey", ["record_id", "revision"])
 

@@ -60,6 +60,9 @@ class Account():
 
 class kintoneService():
     ENCODE = "utf-8"
+    SELECT_LIMIT = 500
+    UPDATE_LIMIT = 100
+
     DATE_FORMAT = "%Y-%m-%d"
     TIME_FORMAT = "%H:%M"
     DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
