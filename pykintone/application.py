@@ -4,7 +4,7 @@ from pykintone.account import kintoneService
 import pykintone.result as pykr
 
 
-class Application():
+class Application(object):
     API_ROOT = "https://{0}.cybozu.com/k/v1/{1}"
 
     def __init__(self, account, app_id, api_token="", app_name=""):

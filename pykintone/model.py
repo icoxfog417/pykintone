@@ -5,7 +5,7 @@ from datetime import datetime
 from pykintone.account import kintoneService as ks
 
 
-class kintoneModel():
+class kintoneModel(object):
     def __init__(self):
         self.record_id = -1
         self.revision = -1
@@ -149,7 +149,7 @@ class kintoneModel():
         return value
 
 
-class PropertyDetail():
+class PropertyDetail(object):
     def __init__(self, name, field_type=None, sub_type=None, unsent=False, field_name=""):
         self.name = name
         self.field_type = field_type

@@ -4,7 +4,7 @@ from collections import namedtuple
 Error = namedtuple("Error", ["message", "id", "code"])
 
 
-class Result():
+class Result(object):
 
     def __init__(self, response):
         self.ok = response.ok

@@ -3,7 +3,7 @@ import yaml
 import pytz
 
 
-class Account():
+class Account(object):
 
     def __init__(self, domain,
                  login_id="", login_password="",
@@ -58,7 +58,7 @@ class Account():
         return "\n".join(infos)
 
 
-class kintoneService():
+class kintoneService(object):
     ENCODE = "utf-8"
     SELECT_LIMIT = 500
     UPDATE_LIMIT = 100
