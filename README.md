@@ -55,6 +55,7 @@ pip install pykintone
 
 * [PyYAML](http://pyyaml.org/wiki/PyYAML)
 * [requests](http://docs.python-requests.org/en/latest/)
+* ([enum34](https://pypi.python.org/pypi/enum34)) for Python2
 
 You can write account setting file as below (yaml format).
 
