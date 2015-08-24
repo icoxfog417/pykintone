@@ -29,7 +29,7 @@ from pykintone import model
 class Person(model.kintoneModel):
 
     def __init__(self):
-        super().__init__()
+        super(Person, self).__init__()
         self.last_name = ""
         self.first_name = ""
 

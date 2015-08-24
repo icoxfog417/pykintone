@@ -9,7 +9,7 @@ from pykintone.model import PropertyDetail, FieldType
 class TestAppModel(kintoneModel):
 
     def __init__(self):
-        super().__init__()
+        super(TestAppModel, self).__init__()
         self.my_key = ""
         self.stringField = ""
         self.numberField = 0
@@ -38,7 +38,7 @@ class TestAppModel(kintoneModel):
 class History(kintoneModel):
 
     def __init__(self, desc="", ymd=None):
-        super().__init__()
+        super(History, self).__init__()
         self.changeYMD = datetime.now() if not ymd else ymd
         self.historyDesc = desc
         self._property_details.append(PropertyDetail("changeYMD", FieldType.DATETIME))
