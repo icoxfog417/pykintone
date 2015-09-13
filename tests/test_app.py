@@ -140,3 +140,12 @@ class TestApp(unittest.TestCase):
         # create (will be error)
         result = app.create(record)
         self.assertFalse(result.ok)
+
+    def test_options(self):
+        app = pykintone.load(envs.FILE_PATH).app()
+        app.requests_opstions = {
+            "verify": True
+        }
+        result = app.select()
+        self.assertTrue(result.ok)
+        self.assertTrue(len(result.records) > 0)
