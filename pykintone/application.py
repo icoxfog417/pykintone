@@ -57,7 +57,7 @@ class Application(object):
             "id": record_id
         }
 
-        r = requests.get(url, headers=headers, params=params)
+        r = requests.get(url, headers=headers, params=params, **self.requests_opstions)
         return pykr.SelectSingleResult(r)
 
     def select(self, query="", fields=()):
@@ -76,7 +76,7 @@ class Application(object):
         if len(fields) > 0:
             data["fields"] = fields
 
-        r = requests.post(url, headers=headers, data=json.dumps(data))
+        r = requests.post(url, headers=headers, data=json.dumps(data), **self.requests_opstions)
         return pykr.SelectResult(r)
 
     def __get_model_type(self, instance):
@@ -110,7 +110,7 @@ class Application(object):
             "record": _record
         }
 
-        resp = requests.post(url, headers=headers, data=json.dumps(data))
+        resp = requests.post(url, headers=headers, data=json.dumps(data), **self.requests_opstions)
         r = pykr.CreateResult(resp)
 
         return r
@@ -125,7 +125,7 @@ class Application(object):
             "records": _records
         }
 
-        resp = requests.post(url, headers=headers, data=json.dumps(data))
+        resp = requests.post(url, headers=headers, data=json.dumps(data), **self.requests_opstions)
         r = pykr.BatchCreateResult(resp)
 
         return r
@@ -154,7 +154,7 @@ class Application(object):
         data = self.__to_update_format(record_or_model)
         data["app"] = self.app_id
 
-        resp = requests.put(url, headers=headers, data=json.dumps(data))
+        resp = requests.put(url, headers=headers, data=json.dumps(data), **self.requests_opstions)
         r = pykr.UpdateResult(resp)
 
         return r
@@ -169,7 +169,7 @@ class Application(object):
             "records": _records
         }
 
-        resp = requests.put(url, headers=headers, data=json.dumps(data))
+        resp = requests.put(url, headers=headers, data=json.dumps(data), **self.requests_opstions)
         r = pykr.BatchUpdateResult(resp)
 
         return r
@@ -220,7 +220,7 @@ class Application(object):
         else:
             data["ids"] = ids
 
-        resp = requests.delete(url, headers=headers, data=json.dumps(data))
+        resp = requests.delete(url, headers=headers, data=json.dumps(data), **self.requests_opstions)
         r = pykr.Result(resp)
 
         return r
