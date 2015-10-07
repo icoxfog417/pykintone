@@ -7,12 +7,12 @@ import pykintone.result as pykr
 class Application(object):
     API_ROOT = "https://{0}.cybozu.com/k/v1/{1}"
 
-    def __init__(self, account, app_id, api_token="", app_name=""):
+    def __init__(self, account, app_id, api_token="", app_name="", requests_options={}):
         self.account = account
         self.app_id = app_id
         self.api_token = api_token
         self.app_name = app_name
-        self.requests_opstions = {}
+        self.requests_options = requests_options
 
     def __make_headers(self, body=True):
         # create header
@@ -57,7 +57,7 @@ class Application(object):
             "id": record_id
         }
 
-        r = requests.get(url, headers=headers, params=params, **self.requests_opstions)
+        r = requests.get(url, headers=headers, params=params, **self.requests_options)
         return pykr.SelectSingleResult(r)
 
     def select(self, query="", fields=()):
@@ -76,7 +76,7 @@ class Application(object):
         if len(fields) > 0:
             data["fields"] = fields
 
-        r = requests.post(url, headers=headers, data=json.dumps(data), **self.requests_opstions)
+        r = requests.post(url, headers=headers, data=json.dumps(data), **self.requests_options)
         return pykr.SelectResult(r)
 
     def __get_model_type(self, instance):
@@ -110,7 +110,7 @@ class Application(object):
             "record": _record
         }
 
-        resp = requests.post(url, headers=headers, data=json.dumps(data), **self.requests_opstions)
+        resp = requests.post(url, headers=headers, data=json.dumps(data), **self.requests_options)
         r = pykr.CreateResult(resp)
 
         return r
@@ -125,7 +125,7 @@ class Application(object):
             "records": _records
         }
 
-        resp = requests.post(url, headers=headers, data=json.dumps(data), **self.requests_opstions)
+        resp = requests.post(url, headers=headers, data=json.dumps(data), **self.requests_options)
         r = pykr.BatchCreateResult(resp)
 
         return r
@@ -154,7 +154,7 @@ class Application(object):
         data = self.__to_update_format(record_or_model)
         data["app"] = self.app_id
 
-        resp = requests.put(url, headers=headers, data=json.dumps(data), **self.requests_opstions)
+        resp = requests.put(url, headers=headers, data=json.dumps(data), **self.requests_options)
         r = pykr.UpdateResult(resp)
 
         return r
@@ -169,7 +169,7 @@ class Application(object):
             "records": _records
         }
 
-        resp = requests.put(url, headers=headers, data=json.dumps(data), **self.requests_opstions)
+        resp = requests.put(url, headers=headers, data=json.dumps(data), **self.requests_options)
         r = pykr.BatchUpdateResult(resp)
 
         return r
@@ -220,7 +220,7 @@ class Application(object):
         else:
             data["ids"] = ids
 
-        resp = requests.delete(url, headers=headers, data=json.dumps(data), **self.requests_opstions)
+        resp = requests.delete(url, headers=headers, data=json.dumps(data), **self.requests_options)
         r = pykr.Result(resp)
 
         return r
