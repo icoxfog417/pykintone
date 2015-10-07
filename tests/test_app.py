@@ -143,7 +143,7 @@ class TestApp(unittest.TestCase):
 
     def test_options(self):
         app = pykintone.load(envs.FILE_PATH).app()
-        app.requests_opstions = {
+        app.requests_options = {
             "verify": True
         }
         result = app.select()
