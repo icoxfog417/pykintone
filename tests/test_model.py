@@ -3,7 +3,7 @@ from datetime import datetime
 import tests.envs as envs
 import pykintone
 from pykintone.model import kintoneModel
-from pykintone.model import PropertyDetail, FieldType
+from pykintone.structure import PropertyDetail, FieldType
 
 
 class TestAppModel(kintoneModel):
