@@ -14,6 +14,29 @@ class Account(object):
         self.basic_id = basic_id
         self.basic_password = basic_password
 
+    def to_header(self, api_token="", with_content_type=True):
+        header = {}
+        header["Host"] = "{0}.cybozu.com:443".format(self.domain)
+
+        def encode(user_id, password):
+            import base64
+            return base64.b64encode("{0}:{1}".format(user_id, password).encode(kintoneService.ENCODE))
+
+        if self.basic_id:
+            auth = encode(self.basic_id, self.basic_password)
+            header["Authorization"] = "Basic {0}".format(auth)
+
+        if api_token:
+            header["X-Cybozu-API-Token"] = api_token
+        elif self.login_id:
+            auth = encode(self.login_id, self.login_password)
+            header["X-Cybozu-Authorization"] = auth
+
+        if with_content_type:
+            header["Content-Type"] = "application/json"
+
+        return header
+
     @classmethod
     def load(cls, path):
         apps = None
@@ -66,6 +89,7 @@ class kintoneService(object):
     DATE_FORMAT = "%Y-%m-%d"
     TIME_FORMAT = "%H:%M"
     DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
+    TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
     from tzlocal import get_localzone
     __TIME_ZONE = get_localzone()
 
@@ -101,6 +125,15 @@ class kintoneService(object):
     @classmethod
     def value_to_datetime(cls, value):
         d = datetime.strptime(value, cls.DATETIME_FORMAT)
+        return cls._to_local(d)
+
+    @classmethod
+    def value_to_timestamp(cls, value):
+        d = datetime.strptime(value, cls.TIMESTAMP_FORMAT)
+        return cls._to_local(d)
+
+    @classmethod
+    def _to_local(cls, d):
         utc = d.replace(tzinfo=pytz.utc)  # configure timezone (on kintone, time is utc)
         local = utc.astimezone(cls.__TIME_ZONE).replace(tzinfo=None)  # to local, and to native
         return local
