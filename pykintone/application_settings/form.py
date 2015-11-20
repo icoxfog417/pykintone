@@ -52,8 +52,7 @@ class FormAPI(BaseAPI):
             if isinstance(f, ff.BaseField):
                 c = f.code
             else:
-                body = list(f.values())[0]
-                c = "" if "code" not in body else body["code"]
+                c = "" if "code" not in f else f["code"]
             if c:
                 codes.append(c)
         return codes
@@ -70,8 +69,6 @@ class FormAPI(BaseAPI):
             st = serialize(t)
             if "code" in st and "type" in st:
                 properties[st["code"]] = st
-            else:
-                properties.update(st)
 
         formatted = {"properties": properties}
         envelope = self.__pack(formatted, app_id, revision)

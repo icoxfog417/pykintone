@@ -55,13 +55,11 @@ class TestForm(unittest.TestCase):
     def _make_fields(self):
         f1 = ff.BaseFormField.create("SINGLE_LINE_TEXT", "title", "title")
         f2 = {
-            "description": {
                 "code": "description",
                 "type": "RICH_TEXT",
                 "label": "Description",
                 "defaultValue": "rich rich"
             }
-        }
 
         fields = [f1, f2]
         return fields
