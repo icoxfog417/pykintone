@@ -76,5 +76,5 @@ class GetFormResult(Result):
 
     def fields(self):
         from pykintone.application_settings.form import FormAPI
-        return FormAPI.to_fields(self.properties)
+        return FormAPI.load_properties(self.properties)
 

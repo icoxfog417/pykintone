@@ -87,7 +87,7 @@ class FormAPI(BaseAPI):
         return _p
 
     @classmethod
-    def to_fields(cls, properties):
+    def load_properties(cls, properties):
         fields = []
         for k in properties:
             p = properties[k]

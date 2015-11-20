@@ -14,7 +14,7 @@ class BaseField(ps.kintoneStructure):
 
     @classmethod
     def deserialize(cls, json_body):
-        return cls._deserialize(json_body, lambda f: (f[0], f[1]))
+        return cls._deserialize(json_body, lambda f: (f, ""))
 
 
 class Label(BaseField):
@@ -46,8 +46,3 @@ class BaseFormField(BaseField):
         f.required = required
         f.default_value = default_value
         return f
-
-    @classmethod
-    def deserialize(cls, json_body):
-        return cls._deserialize(json_body, lambda f: (f, ""))
-
