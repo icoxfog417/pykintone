@@ -79,6 +79,23 @@ class GetFormResult(Result):
         return FormAPI.load_properties(self.properties)
 
 
+class GetLayoutResult(Result):
+
+    def __init__(self, response):
+        super(GetLayoutResult, self).__init__(response)
+        self.value = {}
+        self.revision = -1
+        if self.ok:
+            serialized = response.json()
+            if "layout" in serialized:
+                self.revision = int(serialized["revision"])
+                self.value = serialized["layout"]
+
+    def layouts(self):
+        from pykintone.application_settings.form_layout import Layout
+        return [Layout.deserialize(ly) for ly in self.value]
+
+
 class GetViewResult(Result):
 
     def __init__(self, response):

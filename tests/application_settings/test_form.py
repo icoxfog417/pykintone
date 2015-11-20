@@ -3,6 +3,7 @@ import tests.envs as envs
 import pykintone
 from pykintone.application_settings.administrator import Administrator
 import pykintone.application_settings.form_field as ff
+from pykintone.application_settings.form_layout import Layout
 
 
 class TestForm(unittest.TestCase):
@@ -51,6 +52,40 @@ class TestForm(unittest.TestCase):
         f_def = form_api.get(preview=True).fields()
         deleted = filter_by_codes(f_def, codes)
         self.assertEqual(0, len(deleted))
+
+    def test_get_layout(self):
+        app = pykintone.load(envs.FILE_PATH).app()
+        fl = app.administration().form().get_layout()
+        self.assertTrue(fl.ok)
+        layouts = fl.layouts()
+        self.assertTrue(len(layouts) > 0)
+
+    def test_update_layout(self):
+        ks = pykintone.load(envs.FILE_PATH)
+        form_api = ks.app(self.TEST_APP.app_id).administration().form()
+
+        f1 = ff.BaseFormField.create("SINGLE_LINE_TEXT", "title", "title")
+        f2 = ff.BaseFormField.create("SINGLE_LINE_TEXT", "description", "description")
+        fields = [f1, f2]
+
+        # add fields
+        add_result = form_api.add(fields)
+        self.assertTrue(add_result.ok)
+
+        # create layout
+        layout = Layout.create(fields)
+        form_api.update_layout(layout)
+        v_def = form_api.get_layout(preview=True)
+        self.assertTrue(1, len(v_def.layouts()))
+
+        # update layout
+        size = 200
+        layout.fields[0].width = size
+        form_api.update_layout(layout)
+        updated = form_api.get_layout(preview=True).layouts()[0]
+        lf = [f for f in updated.fields if f.code == layout.fields[0].code][0]
+        self.assertTrue(size, lf.size.width)
+
 
     def _make_fields(self):
         f1 = ff.BaseFormField.create("SINGLE_LINE_TEXT", "title", "title")

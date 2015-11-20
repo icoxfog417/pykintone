@@ -1,17 +1,22 @@
 from pykintone.structure import FieldType
 from pykintone.base_api import BaseAPI
 import pykintone.application_settings.form_field as ff
+from pykintone.application_settings.form_layout import Layout
 import pykintone.application_settings.setting_result as sr
 
 
 class FormAPI(BaseAPI):
-    API_ROOT = "https://{0}.cybozu.com/k/v1{1}/app/form/fields.json"
+    API_ROOT = "https://{0}.cybozu.com/k/v1{1}/app/form/{2}"
 
     def __init__(self, account, api_token="", requests_options=(), app_id=""):
         super(FormAPI, self).__init__(account, api_token, requests_options, app_id)
 
-    def _make_url(self, preview=False):
-        url = self.API_ROOT.format(self.account.domain, "" if not preview else "/preview")
+    def _make_url(self, preview=False, layout=False):
+        kind = "fields.json"
+        if layout:
+            kind = "layout.json"
+
+        url = self.API_ROOT.format(self.account.domain, "" if not preview else "/preview", kind)
         return url
 
     def get(self, app_id="", lang="default", preview=False):
@@ -41,6 +46,32 @@ class FormAPI(BaseAPI):
         envelope = self.__pack(body, app_id, revision)
 
         r = self._request("DELETE", url, params_or_data=envelope, use_api_token=False)
+        return sr.GetRevisionResult(r)
+
+    def get_layout(self, app_id="", preview=False):
+        url = self._make_url(preview, layout=True)
+        params = {
+            "app":  app_id if app_id else self.app_id
+        }
+
+        r = self._request("GET", url, params_or_data=params, use_api_token=False)
+        return sr.GetLayoutResult(r)
+
+    def update_layout(self, json_or_layouts, app_id="", revision=-1):
+        url = self._make_url(preview=True, layout=True)
+
+        body = json_or_layouts
+        if isinstance(json_or_layouts, dict) and "app" in json_or_layouts:
+            pass
+        else:
+            targets = json_or_layouts if isinstance(json_or_layouts, (list, tuple)) else [json_or_layouts]
+            def serialize(ly): return ly if not isinstance(ly, Layout) else ly.serialize()
+            targets = [serialize(t) for t in targets]
+            body = self.__pack({
+                "layout": targets
+            }, app_id, revision)
+
+        r = self._request("PUT", url, params_or_data=body, use_api_token=False)
         return sr.GetRevisionResult(r)
 
     @classmethod

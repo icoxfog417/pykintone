@@ -1,5 +1,4 @@
 import inspect
-import re
 from enum import Enum
 from collections import namedtuple
 from datetime import datetime
@@ -94,7 +93,7 @@ class kintoneStructure(object):
 
         return value
 
-    def _serialize(self, convert_to_key_and_value):
+    def _serialize(self, convert_to_key_and_value, ignore_missing=False):
         """
         serialize model object to dictionary
         :param convert_to_key_and_value: function(field_name, value, property_detail) -> key, value
@@ -112,7 +111,10 @@ class kintoneStructure(object):
             pd = get_property_detail(p)
             value = self._property_to_field(p, pd)
             field_name = p if not pd else pd.to_field_name()
-            if value is not None and not (pd and pd.unsent):
+
+            if value is None or (ignore_missing and not value) or (pd and pd.unsent):
+                continue
+            else:
                 key, value = convert_to_key_and_value(field_name, value, pd)
                 serialized[key] = value
 
@@ -130,6 +132,12 @@ class kintoneStructure(object):
         if not field_type:
             if isinstance(value, datetime):
                 field_type = FieldType.DATE
+
+        if isinstance(value, kintoneStructure):
+            serialize = getattr(value, "serialize", None)
+            if serialize and callable(serialize):
+                value = serialize()
+                field_type = None
 
         if not field_type:
             pass

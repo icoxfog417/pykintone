@@ -16,6 +16,13 @@ class BaseField(ps.kintoneStructure):
     def deserialize(cls, json_body):
         return cls._deserialize(json_body, lambda f: (f, ""))
 
+    def to_layout_field(self):
+        from pykintone.application_settings.form_layout import LayoutField
+        lf = LayoutField()
+        lf.field_type = self.field_type
+        lf.code = self.code
+        return lf
+
 
 class Label(BaseField):
 
