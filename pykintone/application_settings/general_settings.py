@@ -1,5 +1,3 @@
-import json
-import requests
 import pykintone.structure as ps
 from pykintone.base_api import BaseAPI
 import pykintone.application_settings.setting_result as sr
@@ -13,14 +11,13 @@ class GeneralSettingsAPI(BaseAPI):
 
     def get(self, app_id=""):
         url = self.API_ROOT.format(self.account.domain)
-        headers = self.account.to_header(self.api_token, with_content_type=False)
         _app_id = app_id if app_id else self.app_id
 
         params = {
             "id": _app_id
         }
 
-        r = requests.get(url, headers=headers, params=params, **self.requests_options)
+        r = self._request("GET", url, params_or_data=params)
         return sr.SingleGeneralResult(r)
 
     def select(self, query):
@@ -36,12 +33,8 @@ class GeneralSettingsAPI(BaseAPI):
             _body = json_or_model.serialize()
             _body["app"] = json_or_model.app_id
 
-        headers = self.account.to_header(self.api_token)
-
-        r = requests.put(url, headers=headers, data=json.dumps(_body), **self.requests_options)
-        r = sr.GetRevisionResult(r)
-
-        return r
+        r = self._request("PUT", url, params_or_data=_body, use_api_token=False)
+        return sr.GetRevisionResult(r)
 
 
 class GeneralSettings(ps.kintoneStructure):
