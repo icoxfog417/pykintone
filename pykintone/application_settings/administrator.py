@@ -109,3 +109,7 @@ class Administrator(BaseAPI):
     def form(self):
         from pykintone.application_settings.form import FormAPI
         return FormAPI(self.account, self.api_token, self.requests_options, self.app_id)
+
+    def view(self):
+        from pykintone.application_settings.view import ViewAPI
+        return ViewAPI(self.account, self.api_token, self.requests_options, self.app_id)

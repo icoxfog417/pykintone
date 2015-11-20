@@ -78,3 +78,37 @@ class GetFormResult(Result):
         from pykintone.application_settings.form import FormAPI
         return FormAPI.load_properties(self.properties)
 
+
+class GetViewResult(Result):
+
+    def __init__(self, response):
+        super(GetViewResult, self).__init__(response)
+        self.value = {}
+        self.revision = -1
+        if self.ok:
+            serialized = response.json()
+            if "views" in serialized:
+                self.revision = int(serialized["revision"])
+                self.value = serialized["views"]
+
+    def views(self):
+        from pykintone.application_settings.view import View
+        views = []
+        for k in self.value:
+            v = View.deserialize(self.value[k])
+            views.append(v)
+        return views
+
+
+class UpdateViewsResult(Result):
+
+    def __init__(self, response):
+        super(UpdateViewsResult, self).__init__(response)
+        self.views = {}
+        self.revision = -1
+        if self.ok:
+            serialized = response.json()
+            if "views" in serialized:
+                self.revision = int(serialized["revision"])
+                for k in serialized["views"]:
+                    self.views[k] = serialized["views"][k]["id"]

@@ -28,12 +28,12 @@ class TestForm(unittest.TestCase):
         fields = fr.fields()
         self.assertTrue(len(fields) > 0)
 
-    def test_edit_fields(self):
+    def test_update_fields(self):
         ks = pykintone.load(envs.FILE_PATH)
         form_api = ks.app(self.TEST_APP.app_id).administration().form()
 
         fields = self._make_fields()
-        codes = form_api._gather_codes(fields)
+        codes = form_api.gather_codes(fields)
 
         def filter_by_codes(fs, target_codes):
             return [f for f in fs if f.code in target_codes]

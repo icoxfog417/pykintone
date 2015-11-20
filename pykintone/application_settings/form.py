@@ -33,7 +33,7 @@ class FormAPI(BaseAPI):
 
     def delete(self, json_or_models, app_id="", revision=-1):
         url = self._make_url(preview=True)
-        codes = self._gather_codes(json_or_models)
+        codes = self.gather_codes(json_or_models)
 
         body = {
             "fields": codes
@@ -44,21 +44,23 @@ class FormAPI(BaseAPI):
         return sr.GetRevisionResult(r)
 
     @classmethod
-    def _gather_codes(cls, fields):
+    def gather_codes(cls, fields):
         _fields = fields if isinstance(fields, (list, tuple)) else [fields]
         codes = []
         for f in _fields:
             c = ""
             if isinstance(f, ff.BaseField):
                 c = f.code
+            elif isinstance(f, dict) and "code" in f:
+                c = f["code"]
             else:
-                c = "" if "code" not in f else f["code"]
+                c = str(f)
             if c:
                 codes.append(c)
         return codes
 
     def _format_fields(self, fields, app_id="", revision=-1):
-        if "app" in fields and "properties" in fields:
+        if isinstance(fields, dict) and ("app" in fields and "properties" in fields):
             return fields
 
         def serialize(f): return f if not isinstance(f, ff.BaseField) else f.serialize()
