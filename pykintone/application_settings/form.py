@@ -5,7 +5,7 @@ import pykintone.application_settings.setting_result as sr
 
 
 class FormAPI(BaseAPI):
-    API_ROOT = "https://{0}.cybozu.com/k/v1/{1}app/form/fields.json"
+    API_ROOT = "https://{0}.cybozu.com/k/v1{1}/app/form/fields.json"
 
     def __init__(self, account, api_token="", requests_options=(), app_id=""):
         super(FormAPI, self).__init__(account, api_token, requests_options, app_id)
@@ -21,12 +21,70 @@ class FormAPI(BaseAPI):
             "lang": lang
         }
 
-        r = self._request("GET", url, params_or_data=params)
+        r = self._request("GET", url, params_or_data=params, use_api_token=False)
         return sr.GetFormResult(r)
 
+    def add(self, json_or_models, app_id="", revision=-1):
+        url = self._make_url(preview=True)
+        body = self._format_fields(json_or_models, app_id if app_id else self.app_id, revision)
+
+        r = self._request("POST", url, params_or_data=body, use_api_token=False)
+        return sr.GetRevisionResult(r)
+
+    def delete(self, json_or_models, app_id="", revision=-1):
+        url = self._make_url(preview=True)
+        codes = self._gather_codes(json_or_models)
+
+        body = {
+            "fields": codes
+        }
+        envelope = self.__pack(body, app_id, revision)
+
+        r = self._request("DELETE", url, params_or_data=envelope, use_api_token=False)
+        return sr.GetRevisionResult(r)
+
     @classmethod
-    def serialize_fields(cls, fields):
-        pass
+    def _gather_codes(cls, fields):
+        _fields = fields if isinstance(fields, (list, tuple)) else [fields]
+        codes = []
+        for f in _fields:
+            c = ""
+            if isinstance(f, ff.BaseField):
+                c = f.code
+            else:
+                body = list(f.values())[0]
+                c = "" if "code" not in body else body["code"]
+            if c:
+                codes.append(c)
+        return codes
+
+    def _format_fields(self, fields, app_id="", revision=-1):
+        if "app" in fields and "properties" in fields:
+            return fields
+
+        def serialize(f): return f if not isinstance(f, ff.BaseField) else f.serialize()
+        targets = fields if isinstance(fields, (list, tuple)) else [fields]
+
+        properties = {}
+        for t in targets:
+            st = serialize(t)
+            if "code" in st and "type" in st:
+                properties[st["code"]] = st
+            else:
+                properties.update(st)
+
+        formatted = {"properties": properties}
+        envelope = self.__pack(formatted, app_id, revision)
+
+        return envelope
+
+    def __pack(self, pack, app_id="", revision=-1):
+        _p = pack.copy()
+        _p["app"] = app_id if app_id else self.app_id
+        if revision > -1:
+            _p["revision"] = revision
+
+        return _p
 
     @classmethod
     def to_fields(cls, properties):

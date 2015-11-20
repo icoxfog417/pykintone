@@ -39,7 +39,7 @@ class GeneralSettingsAPI(BaseAPI):
         headers = self.account.to_header(self.api_token)
 
         r = requests.put(url, headers=headers, data=json.dumps(_body), **self.requests_options)
-        r = sr.UpdateGeneralResult(r)
+        r = sr.GetRevisionResult(r)
 
         return r
 

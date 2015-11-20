@@ -17,10 +17,10 @@ class SingleGeneralResult(Result):
         return GeneralSettings.deserialize(self.value)
 
 
-class UpdateGeneralResult(Result):
+class GetRevisionResult(Result):
 
     def __init__(self, response):
-        super(UpdateGeneralResult, self).__init__(response)
+        super(GetRevisionResult, self).__init__(response)
         self.revision = -1
         if self.ok:
             serialized = response.json()
@@ -77,3 +77,4 @@ class GetFormResult(Result):
     def fields(self):
         from pykintone.application_settings.form import FormAPI
         return FormAPI.to_fields(self.properties)
+

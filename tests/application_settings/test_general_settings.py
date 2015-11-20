@@ -1,6 +1,7 @@
 import unittest
 import tests.envs as envs
 import pykintone
+from pykintone.application_settings.administrator import Administrator
 
 
 class TestGeneralSettings(unittest.TestCase):
@@ -13,6 +14,15 @@ class TestGeneralSettings(unittest.TestCase):
         self.assertTrue(s.creator)
 
     def test_update_general_settings(self):
+        account = pykintone.load(envs.FILE_PATH).account
+        admin = Administrator(account)
+
+        created = admin.create_application("test_create_application")
+        self.assertTrue(created.ok)
+        rollbacked = admin.rollback_settings(created.app_id)
+        self.assertTrue(rollbacked.ok)
+        print(rollbacked.result)
+
         app = pykintone.load(envs.FILE_PATH).app()
 
         g = app.administration().general_settings()
