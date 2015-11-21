@@ -1,14 +1,32 @@
 import json
 import asyncio
 import requests
-from pykintone.base_api import BaseAPI
-import pykintone.application_settings.setting_result as ar
+import pykintone.structure as ps
+from pykintone.application_settings.base_administration_api import BaseAdministrationAPI
+import pykintone.application_settings.setting_result as sr
 
 
-class Administrator(BaseAPI):
+class Administrator(BaseAdministrationAPI):
 
     def __init__(self, account, api_token="", requests_options=(), app_id=""):
         super(Administrator, self).__init__(account, api_token, requests_options, app_id)
+
+    def __get_admin(self):
+        return self
+
+    def get_application(self, app_id=""):
+        url = "https://{0}.cybozu.com/k/v1/app.json".format(self.account.domain)
+
+        params = {
+            "id": app_id if app_id else self.app_id
+        }
+
+        r = self._request("GET", url, params_or_data=params, use_api_token=False)
+        return sr.GetApplicationSettingsResult(r)
+
+    def select_applications(self, app_ids=(), codes=(), name="", spaceIds=(), limit=-1, offset=-1):
+        # todo: implements select applications
+        pass
 
     def create_application(self, name, space_id="", thread_id=""):
         # this api is preview
@@ -24,7 +42,9 @@ class Administrator(BaseAPI):
             body["thread"] = thread_id
 
         r = requests.post(url, headers=headers, data=json.dumps(body), **self.requests_options)
-        return ar.CreateApplicationResult(r)
+        cr = sr.CreateApplicationResult(r)
+        self.app_id = cr.app_id
+        return cr
 
     def commit_settings(self, app_id, revision=-1):
         r = self.__deploy_application(app_id, revision)
@@ -44,9 +64,11 @@ class Administrator(BaseAPI):
                 s["revision"] = r
             return s
 
+        _app_id = app_id if app_id else self.app_id
+        _revision = revision if revision > -1 else self._commit_revision
         headers = self.account.to_header()  # you can not use api token when create the application.
         body = {
-            "apps": [serialize(app_id, revision)],
+            "apps": [serialize(_app_id, _revision)],
             "revert": rollback
         }
 
@@ -54,10 +76,10 @@ class Administrator(BaseAPI):
         if r.ok:
             # wait till application deploy complete
             loop = asyncio.get_event_loop()
-            result = loop.run_until_complete(self.wait_untill_complete([app_id]))
-            return ar.DeployResult(r, result)
+            result = loop.run_until_complete(self.wait_untill_complete([_app_id]))
+            return sr.DeployResult(r, result)
         else:
-            return ar.DeployResult(r, None)
+            return sr.DeployResult(r, None)
 
     @asyncio.coroutine
     def wait_untill_complete(self, app_id_or_ids):
@@ -100,7 +122,7 @@ class Administrator(BaseAPI):
         }
 
         r = requests.get(url, headers=headers, data=json.dumps(params), **self.requests_options)
-        return ar.DeployProgressResult(r)
+        return sr.DeployProgressResult(r)
 
     def general_settings(self):
         from pykintone.application_settings.general_settings import GeneralSettingsAPI
@@ -113,3 +135,37 @@ class Administrator(BaseAPI):
     def view(self):
         from pykintone.application_settings.view import ViewAPI
         return ViewAPI(self.account, self.api_token, self.requests_options, self.app_id)
+
+
+class ApplicationSettings(ps.kintoneStructure):
+
+    def __init__(self):
+        super(ApplicationSettings, self).__init__()
+        self.app_id = ""
+        # self.code = "" # nothing is set
+        self.name = ""
+        self.description = ""
+        self.space_id = ""
+        self.thread_id = ""
+        self.created_at = None
+        self.creator = None
+        self.modified_at = None
+        self.modifier = None
+
+        self._property_details.append(ps.PropertyDetail("app_id", field_name="appId", unsent=True))
+        self._property_details.append(ps.PropertyDetail("space_id", field_name="spaceId", unsent=True))
+        self._property_details.append(ps.PropertyDetail("thread_id", field_name="threadId", unsent=True))
+        self._property_details.append(ps.PropertyDetail("created_at", field_name="createdAt", field_type=ps.FieldType.TIME_STAMP, unsent=True))
+        self._property_details.append(ps.PropertyDetail("creator", ps.FieldType.CREATOR, unsent=True))
+        self._property_details.append(ps.PropertyDetail("modified_at", field_name="modifiedAt", field_type=ps.FieldType.TIME_STAMP, unsent=True))
+        self._property_details.append(ps.PropertyDetail("modifier", ps.FieldType.MODIFIER, unsent=True))
+
+    def serialize(self):
+        return self._serialize(lambda name, value, pd: (name, value))
+
+    @classmethod
+    def deserialize(cls, json_body):
+        return cls._deserialize(json_body, lambda f: (f, ""))
+
+    def __str__(self):
+        return "{0}: {1}".format(self.app_id, self.name)

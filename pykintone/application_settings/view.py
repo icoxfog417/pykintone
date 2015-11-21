@@ -1,9 +1,9 @@
 import pykintone.structure as ps
-from pykintone.base_api import BaseAPI
+from pykintone.application_settings.base_administration_api import BaseAdministrationAPI
 import pykintone.application_settings.setting_result as sr
 
 
-class ViewAPI(BaseAPI):
+class ViewAPI(BaseAdministrationAPI):
     API_ROOT = "https://{0}.cybozu.com/k/v1{1}/app/views.json"
 
     def __init__(self, account, api_token="", requests_options=(), app_id=""):

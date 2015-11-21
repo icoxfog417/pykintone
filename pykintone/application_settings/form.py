@@ -1,11 +1,11 @@
 from pykintone.structure import FieldType
-from pykintone.base_api import BaseAPI
+from pykintone.application_settings.base_administration_api import BaseAdministrationAPI
 import pykintone.application_settings.form_field as ff
 from pykintone.application_settings.form_layout import Layout
 import pykintone.application_settings.setting_result as sr
 
 
-class FormAPI(BaseAPI):
+class FormAPI(BaseAdministrationAPI):
     API_ROOT = "https://{0}.cybozu.com/k/v1{1}/app/form/{2}"
 
     def __init__(self, account, api_token="", requests_options=(), app_id=""):

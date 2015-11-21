@@ -86,7 +86,6 @@ class TestForm(unittest.TestCase):
         lf = [f for f in updated.fields if f.code == layout.fields[0].code][0]
         self.assertTrue(size, lf.size.width)
 
-
     def _make_fields(self):
         f1 = ff.BaseFormField.create("SINGLE_LINE_TEXT", "title", "title")
         f2 = {

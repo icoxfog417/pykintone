@@ -2,14 +2,29 @@ from collections import namedtuple
 from pykintone.result import Result
 
 
-class SingleGeneralResult(Result):
+class GetApplicationSettingsResult(Result):
 
     def __init__(self, response):
-        super(SingleGeneralResult, self).__init__(response)
+        super(GetApplicationSettingsResult, self).__init__(response)
         self.value = {}
         if self.ok:
             serialized = response.json()
             if "appId" in serialized:
+                self.value = serialized
+
+    def settings(self):
+        from pykintone.application_settings.administrator import ApplicationSettings
+        return ApplicationSettings.deserialize(self.value)
+
+
+class GetGeneralSettingsResult(Result):
+
+    def __init__(self, response):
+        super(GetGeneralSettingsResult, self).__init__(response)
+        self.value = {}
+        if self.ok:
+            serialized = response.json()
+            if "revision" in serialized:
                 self.value = serialized
 
     def settings(self):
