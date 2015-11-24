@@ -3,7 +3,8 @@ from datetime import datetime
 import tests.envs as envs
 import pykintone
 from pykintone.model import kintoneModel
-from pykintone.model import PropertyDetail, FieldType
+import pykintone.structure_field as sf
+from pykintone.structure import PropertyDetail, FieldType
 
 
 class TestAppModel(kintoneModel):
@@ -18,16 +19,15 @@ class TestAppModel(kintoneModel):
         self.dateField = datetime.now()
         self.time = datetime.now()
         self.datetimeField = datetime.now()
-        self.user_select = None
+        self.user_select = sf.UserSelect()
         self.created_time = None
         self.updated_time = None
         self.creator = None
         self.modifier = None
         self.changeLogs = []
+        self.attachfile = sf.File()
 
         self._property_details.append(PropertyDetail("time", FieldType.TIME))
-        self._property_details.append(PropertyDetail("datetimeField", FieldType.DATETIME))
-        self._property_details.append(PropertyDetail("user_select", FieldType.USER_SELECT))
         self._property_details.append(PropertyDetail("created_time", FieldType.CREATED_TIME, field_name="作成日時", unsent=True))
         self._property_details.append(PropertyDetail("updated_time", FieldType.UPDATED_TIME, field_name="更新日時", unsent=True))
         self._property_details.append(PropertyDetail("creator", FieldType.CREATOR, field_name="作成者", unsent=True))
@@ -115,3 +115,34 @@ class TestModel(unittest.TestCase):
         app.delete(updateds)
         deleted = select_models()
         self.assertEqual(0, len(deleted))
+
+    def test_user_select(self):
+        app = pykintone.load(envs.FILE_PATH).app()
+
+        model = TestAppModel()
+        model.my_key = "user_select_field_check"
+        result = app.create(model)
+        self.assertTrue(result.ok)
+        created = app.get(result.record_id).model(TestAppModel)
+
+        created.user_select = sf.UserSelect(created.creator.code)
+        result = app.update(created)
+        self.assertTrue(result.ok)
+        app.delete([created])
+
+    def test_file(self):
+        import os
+        app = pykintone.load(envs.FILE_PATH).app()
+        file_path = os.path.join(os.path.dirname(__file__), "./kintone.PNG")
+
+        model = TestAppModel()
+        model.my_key = "file_field_check"
+        model.attachfile = sf.File.upload(file_path, app)
+        self.assertTrue(model.attachfile)
+
+        result = app.create(model)
+        self.assertTrue(result.ok)
+        created = app.get(result.record_id).model(TestAppModel)
+        file = created.attachfile.download(app)
+        self.assertTrue(file)
+        app.delete([created])
