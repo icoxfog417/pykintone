@@ -19,6 +19,9 @@ class BaseAPI(object):
         if m == "GET":
             h = h if h else self.account.to_header(api_token=token, with_content_type=False)
             r = requests.get(url, params=params_or_data, headers=h, **self.requests_options)
+        elif m == "FILE":
+            h = h if h else self.account.to_header(api_token=token, with_content_type=False)
+            r = requests.request("POST", url, files=params_or_data, headers=h, **self.requests_options)
         else:
             h = h if h else self.account.to_header(api_token=token)
             r = requests.request(m, url, data=json.dumps(params_or_data), headers=h, **self.requests_options)

@@ -79,9 +79,9 @@ class kintoneStructure(object):
         elif _field_type == FieldType.TIME_STAMP:
             value = ks.value_to_timestamp(value)
         elif _field_type == FieldType.USER_SELECT:
-            value = [sf.UserSelect(v["code"], v["name"]) for v in value]
+            value = cls.__map(value, lambda v: sf.UserSelect.deserialize(v), flatten=True)
         elif _field_type in [FieldType.CREATOR, FieldType.MODIFIER]:
-            value = sf.UserSelect(value["code"], value["name"])
+            value = sf.UserSelect.deserialize(value)
         elif _field_type == FieldType.SUBTABLE:
             if property_detail and property_detail.sub_type:
                 table = []
@@ -91,7 +91,7 @@ class kintoneStructure(object):
                     table.append(row)
                 value = table
         elif _field_type == FieldType.FILE:
-            pass  # todo: conversion for file
+            value = cls.__map(value, lambda v: sf.File.deserialize(v), flatten=True)
         elif _field_type == FieldType.STRUCTURE:
             cls_type = None
             if property_detail and property_detail.sub_type:
@@ -105,10 +105,7 @@ class kintoneStructure(object):
                     ds = getattr(ins, "deserialize", None)
                     return None if not (ds and callable(ds)) else ds(v)
 
-                if isinstance(value, (list, tuple)):
-                    value = [deserialize(v) for v in value]
-                else:
-                    value = deserialize(value)
+                value = cls.__map(value, lambda v: deserialize(v))
 
         return value
 
@@ -159,9 +156,9 @@ class kintoneStructure(object):
             # time stamp is same as datetime format (there is no field for timestamp in kintone)
             value = ks.datetime_to_value(value)
         elif field_type == FieldType.USER_SELECT:
-            value = [{"code": u.code} for u in value]
+            value = self.__map(value, lambda u: u.serialize(), to_list=True)
         elif field_type in [FieldType.CREATOR, FieldType.MODIFIER]:
-            value = {"code": value.code}
+            value = value.serialize()
         elif field_type == FieldType.SUBTABLE:
             if property_detail and property_detail.sub_type:
                 table = []
@@ -171,16 +168,13 @@ class kintoneStructure(object):
                     })
                 value = table
         elif field_type == FieldType.FILE:
-            pass  # todo: conversion for file
+            value = self.__map(value, lambda v: v.serialize(), to_list=True)
         elif field_type == FieldType.STRUCTURE:
             def serialize(v):
                 s = getattr(v, "serialize", None)
                 return None if not (s and callable(s)) else s()
 
-            if isinstance(value, (list, tuple)):
-                value = [serialize(v) for v in value]
-            else:
-                value = serialize(value)
+            value = self.__map(value, lambda v: serialize(v))
 
         return value
 
@@ -192,10 +186,42 @@ class kintoneStructure(object):
             field_type = FieldType.DATE
         elif issubclass(cls.__get_type(value), kintoneStructure):
             field_type = FieldType.STRUCTURE
-        elif isinstance(value, sf.UserSelect):
+        elif issubclass(cls.__get_type(value), sf.UserSelect):
             field_type = FieldType.USER_SELECT
+        elif issubclass(cls.__get_type(value), sf.File):
+            field_type = FieldType.FILE
 
         return field_type
+
+    @classmethod
+    def __map(cls, value, func, flatten=False, to_list=False):
+        result = None
+        is_none = False
+        if isinstance(value, (list, tuple)):
+            result = [func(v) for v in value]
+            result = [r for r in result if r is not None]
+            if len(result) == 0:
+                is_none = True
+        else:
+            result = func(value)
+            if not result:
+                is_none = True
+
+        if is_none:
+            return None
+        else:
+            if flatten:
+                if isinstance(result, (list, tuple)) and len(result) == 1:
+                    return result[0]
+                else:
+                    return result
+            elif to_list:
+                if isinstance(result, (list, tuple)):
+                    return result
+                else:
+                    return [result]
+            else:
+                return result
 
     @classmethod
     def __get_type(cls, value):

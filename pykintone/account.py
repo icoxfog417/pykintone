@@ -152,3 +152,7 @@ class kintoneService(object):
         utc = local.astimezone(pytz.utc)
         value = utc.strftime(cls.DATETIME_FORMAT)
         return value
+
+    @classmethod
+    def download_file(cls, account):
+        pass
