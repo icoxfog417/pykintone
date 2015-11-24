@@ -7,7 +7,7 @@ class Layout(ps.kintoneStructure):
         super(Layout, self).__init__()
         self.layout_type = "ROW"
         self.code = ""
-        self.fields = []
+        self.fields = [LayoutField]
         self._property_details.append(ps.PropertyDetail("layout_type", field_name="type"))
 
     @classmethod
@@ -34,15 +34,11 @@ class Layout(ps.kintoneStructure):
         return instance
 
     def serialize(self):
-        s = self._serialize(lambda name, value, pd: (name, value), ignore_missing=True)
-        s["fields"] = [f.serialize() for f in s["fields"]]
-        return s
+        return self._serialize(lambda name, value, pd: (name, value), ignore_missing=True)
 
     @classmethod
     def deserialize(cls, json_body):
-        ly = cls._deserialize(json_body, lambda f: (f, ""))
-        ly.fields = [LayoutField.deserialize(f) for f in ly.fields]
-        return ly
+        return cls._deserialize(json_body, lambda f: (f, ""))
 
 
 class LayoutField(ps.kintoneStructure):
@@ -78,9 +74,7 @@ class LayoutField(ps.kintoneStructure):
 
     @classmethod
     def deserialize(cls, json_body):
-        f = cls._deserialize(json_body, lambda f: (f, ""))
-        f.size = LayoutFieldSize.deserialize(f.size)
-        return f
+        return cls._deserialize(json_body, lambda f: (f, ""))
 
 
 class LayoutFieldSize(ps.kintoneStructure):

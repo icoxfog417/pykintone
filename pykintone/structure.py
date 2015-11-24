@@ -1,8 +1,8 @@
 import inspect
 from enum import Enum
-from collections import namedtuple
 from datetime import datetime
 from pykintone.account import kintoneService as ks
+import pykintone.structure_field as sf
 
 
 class kintoneStructure(object):
@@ -43,14 +43,15 @@ class kintoneStructure(object):
             pn = k if not pd else pd.to_property_name(k)
             if pn in properties:
                 v, t = get_value_and_type(field)
-                value = instance._field_to_property(v, t, pd)
+                initial_value = getattr(instance, pn)
+                value = instance._field_to_property(v, t, pd, initial_value)
                 setattr(instance, pn, value)
                 is_set = True
 
         return instance if is_set else None
 
     @classmethod
-    def _field_to_property(cls, field_value, field_type=None, property_detail=None):
+    def _field_to_property(cls, field_value, field_type=None, property_detail=None, initial_value=None):
         value = field_value
 
         # configure property's field type
@@ -61,6 +62,7 @@ class kintoneStructure(object):
             f = [e for e in list(FieldType) if e.value == field_type]
             if len(f) > 0:
                 _field_type = f[0]
+        _field_type = _field_type if _field_type else cls._estimate_type_from_property(initial_value)
 
         if not _field_type:
             pass
@@ -77,9 +79,9 @@ class kintoneStructure(object):
         elif _field_type == FieldType.TIME_STAMP:
             value = ks.value_to_timestamp(value)
         elif _field_type == FieldType.USER_SELECT:
-            value = [UserSelect(v["code"], v["name"]) for v in value]
+            value = [sf.UserSelect(v["code"], v["name"]) for v in value]
         elif _field_type in [FieldType.CREATOR, FieldType.MODIFIER]:
-            value = UserSelect(value["code"], value["name"])
+            value = sf.UserSelect(value["code"], value["name"])
         elif _field_type == FieldType.SUBTABLE:
             if property_detail and property_detail.sub_type:
                 table = []
@@ -90,6 +92,23 @@ class kintoneStructure(object):
                 value = table
         elif _field_type == FieldType.FILE:
             pass  # todo: conversion for file
+        elif _field_type == FieldType.STRUCTURE:
+            cls_type = None
+            if property_detail and property_detail.sub_type:
+                cls_type = property_detail.sub_type
+            elif initial_value:
+                cls_type = cls.__get_type(initial_value)
+
+            if cls_type:
+                def deserialize(v):
+                    ins = cls_type()
+                    ds = getattr(ins, "deserialize", None)
+                    return None if not (ds and callable(ds)) else ds(v)
+
+                if isinstance(value, (list, tuple)):
+                    value = [deserialize(v) for v in value]
+                else:
+                    value = deserialize(value)
 
         return value
 
@@ -128,16 +147,7 @@ class kintoneStructure(object):
         # configure field's type
         # from user definition
         field_type = None if not property_detail else property_detail.field_type
-        # from property's value class
-        if not field_type:
-            if isinstance(value, datetime):
-                field_type = FieldType.DATE
-
-        if isinstance(value, kintoneStructure):
-            serialize = getattr(value, "serialize", None)
-            if serialize and callable(serialize):
-                value = serialize()
-                field_type = None
+        field_type = field_type if field_type else self._estimate_type_from_property(value)
 
         if not field_type:
             pass
@@ -162,8 +172,42 @@ class kintoneStructure(object):
                 value = table
         elif field_type == FieldType.FILE:
             pass  # todo: conversion for file
+        elif field_type == FieldType.STRUCTURE:
+            def serialize(v):
+                s = getattr(v, "serialize", None)
+                return None if not (s and callable(s)) else s()
+
+            if isinstance(value, (list, tuple)):
+                value = [serialize(v) for v in value]
+            else:
+                value = serialize(value)
 
         return value
+
+    @classmethod
+    def _estimate_type_from_property(cls, value):
+        field_type = None
+
+        if isinstance(value, datetime):
+            field_type = FieldType.DATE
+        elif issubclass(cls.__get_type(value), kintoneStructure):
+            field_type = FieldType.STRUCTURE
+        elif isinstance(value, sf.UserSelect):
+            field_type = FieldType.USER_SELECT
+
+        return field_type
+
+    @classmethod
+    def __get_type(cls, value):
+        get_type = lambda v: v if type(v) == type else type(v)
+
+        if isinstance(value, (list, tuple)):
+            if len(value) > 0:
+                return get_type(value[0])
+            else:
+                return type(None)
+        else:
+            return get_type(value)
 
 
 class PropertyDetail(object):
@@ -217,10 +261,8 @@ class FieldType(Enum):
     STATUS_ASSIGNEE = "STATUS_ASSIGNEE"
     ID = "__ID__"
     REVISION = "__REVISION__"
-    TIME_STAMP = "TIME_STAMP"
-
-
-UserSelect = namedtuple("UserSelect", ["code", "name"])
+    TIME_STAMP = "__TIME_STAMP__"
+    STRUCTURE = "__STRUCTURE__"
 
 
 class LayoutType(Enum):

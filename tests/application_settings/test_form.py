@@ -3,7 +3,7 @@ import tests.envs as envs
 import pykintone
 from pykintone.application_settings.administrator import Administrator
 import pykintone.application_settings.form_field as ff
-from pykintone.application_settings.form_layout import Layout
+from pykintone.application_settings.form_layout import Layout, LayoutField, LayoutFieldSize
 
 
 class TestForm(unittest.TestCase):
@@ -57,8 +57,18 @@ class TestForm(unittest.TestCase):
         app = pykintone.load(envs.FILE_PATH).app()
         fl = app.administration().form().get_layout()
         self.assertTrue(fl.ok)
+
+        # deserialize check
         layouts = fl.layouts()
         self.assertTrue(len(layouts) > 0)
+        self.assertTrue(len(layouts[0].fields) > 0)
+        for lf in layouts[0].fields:
+            self.assertTrue(isinstance(lf, LayoutField))
+            self.assertTrue(isinstance(lf.size, LayoutFieldSize))
+
+        # serialize check
+        serialized = layouts[0].serialize()
+        self.assertTrue(fl.value[0], serialized)
 
     def test_update_layout(self):
         ks = pykintone.load(envs.FILE_PATH)
