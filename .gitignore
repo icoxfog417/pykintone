@@ -68,5 +68,6 @@ target/
 *.iws
 
 venv
+venv2
 account.yaml
 MANIFEST

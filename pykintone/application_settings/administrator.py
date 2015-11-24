@@ -1,5 +1,4 @@
 import json
-import asyncio
 import requests
 import pykintone.structure as ps
 from pykintone.application_settings.base_administration_api import BaseAdministrationAPI
@@ -75,14 +74,13 @@ class Administrator(BaseAdministrationAPI):
         r = requests.post(url, headers=headers, data=json.dumps(body), **self.requests_options)
         if r.ok:
             # wait till application deploy complete
-            loop = asyncio.get_event_loop()
-            result = loop.run_until_complete(self.wait_untill_complete([_app_id]))
+            result = self.wait_until_complete([_app_id])
             return sr.DeployResult(r, result)
         else:
             return sr.DeployResult(r, None)
 
-    @asyncio.coroutine
-    def wait_untill_complete(self, app_id_or_ids):
+    def wait_until_complete(self, app_id_or_ids):
+        from time import sleep
         processing = True
         wait_limit = 3
         interval = 0.5
@@ -107,7 +105,8 @@ class Administrator(BaseAdministrationAPI):
             if len(result) == len(apps):
                 processing = False
             else:
-                yield from asyncio.sleep(interval)
+
+                sleep(interval)
                 elapsed += interval
 
         return result

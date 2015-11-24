@@ -22,7 +22,7 @@ class TestGeneral(unittest.TestCase):
             self.assertTrue(created.ok)
 
     def test_create_application(self):
-        account = pykintone.load("path_to_account_setting").account
+        account = pykintone.load(envs.FILE_PATH).account
 
         with Administrator(account).as_test_mode() as admin:
             # create application
