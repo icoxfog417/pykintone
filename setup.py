@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name='pykintone',
-    packages=['pykintone'],
+    packages=['pykintone', 'pykintone.application_settings'],
     install_requires=[
         'PyYAML',
         'requests'
