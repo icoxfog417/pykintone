@@ -18,14 +18,7 @@ pip install pykintone
 
 ## Feature
 
-**Basic operation**
-
-* create
-* read
-* update
-* delete
-
-**Record and model mapping**
+### Record and model mapping
 
 ```python
 import pykintone
@@ -49,7 +42,15 @@ app.update(someone)
 
 ```
 
-**File Field**
+Of course you can use every basic operation.
+
+* create
+* read
+* update
+* delete
+
+
+## File Field
 
 ```python
 import pykintone
@@ -75,7 +76,7 @@ record = app.get(result.record_id).model(MyFolder)
 files = [f.download(app) for f in record.files]
 ```
 
-**Create application**
+## Application Administration
 
 ```python
 import pykintone
@@ -99,6 +100,20 @@ with Administrator(account) as admin:
     admin.view().update(view)
 ```
 
+### User API
+
+```python
+import pykintone
+
+export_api = pykintone.load("path_to_account_setting").user_api().for_exporting
+users = export_api.get_users().users
+```
+
+Export
+
+* users
+* user's organizations and titles
+* user's groups
 
 ## Installation Detail
 
