@@ -30,7 +30,7 @@ class TestView(unittest.TestCase):
         app = pykintone.load(envs.FILE_PATH).app()
         vr = app.administration().view().get()
         self.assertTrue(vr.ok)
-        views = vr.views()
+        views = vr.views
         self.assertTrue(len(views) > 0)
 
     def test_update_views(self):
@@ -44,14 +44,14 @@ class TestView(unittest.TestCase):
         # add views
         add_result = view_api.update(views)
         self.assertTrue(add_result.ok)
-        v_def = view_api.get(preview=True).views()
+        v_def = view_api.get(preview=True).views
         self.assertEqual(1, len(v_def))
 
         # update fields
         views = [View.create(view_name, codes), View.create("another_view", codes,  index=2)]
         update_result = view_api.update(views, revision=add_result.revision)
         self.assertTrue(update_result.ok)
-        v_def = view_api.get(preview=True).views()
+        v_def = view_api.get(preview=True).views
         self.assertEqual(2, len(v_def))
         original = [v for v in v_def if v.name == view_name][0]
         self.assertEqual(len(codes), len(original.fields))

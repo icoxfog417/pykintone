@@ -9,13 +9,6 @@ class BaseField(ps.kintoneStructure):
         self.code = ""
         self._property_details.append(ps.PropertyDetail("field_type", field_name="type"))
 
-    def serialize(self):
-        return self._serialize(lambda name, value, pd: (name, value))
-
-    @classmethod
-    def deserialize(cls, json_body):
-        return cls._deserialize(json_body, lambda f: (f, ""))
-
     def to_layout_field(self):
         from pykintone.application_settings.form_layout import LayoutField
         lf = LayoutField()
@@ -40,8 +33,8 @@ class BaseFormField(BaseField):
         self.required = False
         self.default_value = ""
 
-        self._property_details.append(ps.PropertyDetail("no_label", field_name="noLabel"))
-        self._property_details.append(ps.PropertyDetail("default_value", field_name="defaultValue"))
+        self._pd("no_label", name_style_conversion=True)
+        self._pd("default_value", name_style_conversion=True)
 
     @classmethod
     def create(cls, field_type, code, label, no_label=False, required=False, default_value=""):

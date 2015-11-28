@@ -151,20 +151,13 @@ class ApplicationSettings(ps.kintoneStructure):
         self.modified_at = None
         self.modifier = None
 
-        self._property_details.append(ps.PropertyDetail("app_id", field_name="appId", unsent=True))
-        self._property_details.append(ps.PropertyDetail("space_id", field_name="spaceId", unsent=True))
-        self._property_details.append(ps.PropertyDetail("thread_id", field_name="threadId", unsent=True))
-        self._property_details.append(ps.PropertyDetail("created_at", field_name="createdAt", field_type=ps.FieldType.TIME_STAMP, unsent=True))
-        self._property_details.append(ps.PropertyDetail("creator", ps.FieldType.CREATOR, unsent=True))
-        self._property_details.append(ps.PropertyDetail("modified_at", field_name="modifiedAt", field_type=ps.FieldType.TIME_STAMP, unsent=True))
-        self._property_details.append(ps.PropertyDetail("modifier", ps.FieldType.MODIFIER, unsent=True))
-
-    def serialize(self):
-        return self._serialize(lambda name, value, pd: (name, value))
-
-    @classmethod
-    def deserialize(cls, json_body):
-        return cls._deserialize(json_body, lambda f: (f, ""))
+        self._pd("app_id", name_style_conversion=True, unsent=True)
+        self._pd("space_id", name_style_conversion=True, unsent=True)
+        self._pd("thread_id", name_style_conversion=True, unsent=True)
+        self._pd("created_at", field_type=ps.FieldType.TIME_STAMP, name_style_conversion=True, unsent=True)
+        self._pd("creator", ps.FieldType.CREATOR, unsent=True)
+        self._pd("modified_at", field_type=ps.FieldType.TIME_STAMP, name_style_conversion=True, unsent=True)
+        self._pd("modifier", ps.FieldType.MODIFIER, unsent=True)
 
     def __str__(self):
         return "{0}: {1}".format(self.app_id, self.name)

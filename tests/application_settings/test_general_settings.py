@@ -8,7 +8,7 @@ class TestGeneralSettings(unittest.TestCase):
 
     def test_get_general_settings(self):
         app = pykintone.load(envs.FILE_PATH).app()
-        s = app.administration().general_settings().get().settings()
+        s = app.administration().general_settings().get().settings
         self.assertTrue(s.name)
 
     def test_update_general_settings(self):
@@ -19,9 +19,9 @@ class TestGeneralSettings(unittest.TestCase):
             self.assertTrue(created.ok)
 
             g = admin.general_settings()
-            s = g.get(preview=True).settings()
+            s = g.get(preview=True).settings
             s.description = "test edit description"
             result = g.update(s)
             self.assertTrue(result.revision)
-            after_updated = g.get(preview=True).settings()
+            after_updated = g.get(preview=True).settings
             self.assertEquals(s.description, after_updated.description)

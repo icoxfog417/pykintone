@@ -50,12 +50,5 @@ class GeneralSettings(ps.kintoneStructure):
         self.theme = ""
         self.revision = -1
 
-    def serialize(self):
-        return self._serialize(lambda name, value, pd: (name, value))
-
-    @classmethod
-    def deserialize(cls, json_body):
-        return cls._deserialize(json_body, lambda f: (f, ""))
-
     def __str__(self):
         return "{0}: {1}".format(self.name, self.description)

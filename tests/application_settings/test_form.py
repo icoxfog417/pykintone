@@ -26,7 +26,7 @@ class TestForm(unittest.TestCase):
         app = pykintone.load(envs.FILE_PATH).app()
         fr = app.administration().form().get()
         self.assertTrue(fr.ok)
-        fields = fr.fields()
+        fields = fr.fields
         self.assertTrue(len(fields) > 0)
 
     def test_update_fields(self):
@@ -42,14 +42,14 @@ class TestForm(unittest.TestCase):
         # add fields
         add_result = form_api.add(fields)
         self.assertTrue(add_result.ok)
-        f_def = form_api.get(preview=True).fields()
+        f_def = form_api.get(preview=True).fields
         created = filter_by_codes(f_def, codes)
         self.assertEqual(len(fields), len(created))
 
         # delete fields
         delete_result = form_api.delete(fields, revision=add_result.revision)
         self.assertTrue(delete_result.ok)
-        f_def = form_api.get(preview=True).fields()
+        f_def = form_api.get(preview=True).fields
         deleted = filter_by_codes(f_def, codes)
         self.assertEqual(0, len(deleted))
 
@@ -59,7 +59,7 @@ class TestForm(unittest.TestCase):
         self.assertTrue(fl.ok)
 
         # deserialize check
-        layouts = fl.layouts()
+        layouts = fl.layouts
         self.assertTrue(len(layouts) > 0)
         self.assertTrue(len(layouts[0].fields) > 0)
         for lf in layouts[0].fields:
@@ -68,7 +68,7 @@ class TestForm(unittest.TestCase):
 
         # serialize check
         serialized = layouts[0].serialize()
-        self.assertTrue(fl.value[0], serialized)
+        self.assertTrue(fl.raw[0], serialized)
 
     def test_update_layout(self):
         ks = pykintone.load(envs.FILE_PATH)
@@ -86,13 +86,13 @@ class TestForm(unittest.TestCase):
         layout = Layout.create(fields)
         form_api.update_layout(layout)
         v_def = form_api.get_layout(preview=True)
-        self.assertTrue(1, len(v_def.layouts()))
+        self.assertTrue(1, len(v_def.layouts))
 
         # update layout
         size = 200
         layout.fields[0].width = size
         form_api.update_layout(layout)
-        updated = form_api.get_layout(preview=True).layouts()[0]
+        updated = form_api.get_layout(preview=True).layouts[0]
         lf = [f for f in updated.fields if f.code == layout.fields[0].code][0]
         self.assertTrue(size, lf.size.width)
 

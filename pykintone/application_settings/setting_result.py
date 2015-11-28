@@ -6,30 +6,28 @@ class GetApplicationSettingsResult(Result):
 
     def __init__(self, response):
         super(GetApplicationSettingsResult, self).__init__(response)
-        self.value = {}
+        self.raw = {}
+        self.settings = None
         if self.ok:
             serialized = response.json()
             if "appId" in serialized:
-                self.value = serialized
-
-    def settings(self):
-        from pykintone.application_settings.administrator import ApplicationSettings
-        return ApplicationSettings.deserialize(self.value)
+                self.raw = serialized
+                from pykintone.application_settings.administrator import ApplicationSettings
+                self.settings = ApplicationSettings.deserialize(self.raw)
 
 
 class GetGeneralSettingsResult(Result):
 
     def __init__(self, response):
         super(GetGeneralSettingsResult, self).__init__(response)
-        self.value = {}
+        self.raw = {}
+        self.settings = None
         if self.ok:
             serialized = response.json()
             if "revision" in serialized:
-                self.value = serialized
-
-    def settings(self):
-        from pykintone.application_settings.general_settings import GeneralSettings
-        return GeneralSettings.deserialize(self.value)
+                self.raw = serialized
+                from pykintone.application_settings.general_settings import GeneralSettings
+                self.settings = GeneralSettings.deserialize(self.raw)
 
 
 class GetRevisionResult(Result):
@@ -83,64 +81,59 @@ class GetFormResult(Result):
         super(GetFormResult, self).__init__(response)
         self.properties = {}
         self.revision = -1
+        self.fields = []
         if self.ok:
             serialized = response.json()
             if "properties" in serialized:
                 self.revision = int(serialized["revision"])
                 self.properties = serialized["properties"]
-
-    def fields(self):
-        from pykintone.application_settings.form import FormAPI
-        return FormAPI.load_properties(self.properties)
+                from pykintone.application_settings.form import FormAPI
+                self.fields = FormAPI.load_properties(self.properties)
 
 
 class GetLayoutResult(Result):
 
     def __init__(self, response):
         super(GetLayoutResult, self).__init__(response)
-        self.value = {}
+        self.raw = {}
         self.revision = -1
+        self.layouts = []
         if self.ok:
             serialized = response.json()
             if "layout" in serialized:
                 self.revision = int(serialized["revision"])
-                self.value = serialized["layout"]
-
-    def layouts(self):
-        from pykintone.application_settings.form_layout import Layout
-        return [Layout.deserialize(ly) for ly in self.value]
+                self.raw = serialized["layout"]
+                from pykintone.application_settings.form_layout import Layout
+                self.layouts = [Layout.deserialize(ly) for ly in self.raw]
 
 
 class GetViewResult(Result):
 
     def __init__(self, response):
         super(GetViewResult, self).__init__(response)
-        self.value = {}
+        self.raw = {}
         self.revision = -1
+        self.views = []
         if self.ok:
             serialized = response.json()
             if "views" in serialized:
                 self.revision = int(serialized["revision"])
-                self.value = serialized["views"]
-
-    def views(self):
-        from pykintone.application_settings.view import View
-        views = []
-        for k in self.value:
-            v = View.deserialize(self.value[k])
-            views.append(v)
-        return views
+                self.raw = serialized["views"]
+                from pykintone.application_settings.view import View
+                for k in self.raw:
+                    v = View.deserialize(self.raw[k])
+                    self.views.append(v)
 
 
 class UpdateViewsResult(Result):
 
     def __init__(self, response):
         super(UpdateViewsResult, self).__init__(response)
-        self.views = {}
+        self.view_dict = {}
         self.revision = -1
         if self.ok:
             serialized = response.json()
             if "views" in serialized:
                 self.revision = int(serialized["revision"])
                 for k in serialized["views"]:
-                    self.views[k] = serialized["views"][k]["id"]
+                    self.view_dict[k] = serialized["views"][k]["id"]
