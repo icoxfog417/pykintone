@@ -1,3 +1,4 @@
+import re
 import inspect
 from enum import Enum
 from datetime import datetime
@@ -10,6 +11,12 @@ class kintoneStructure(object):
     def __init__(self):
         self._property_details = []
 
+    def _pd(self, name, field_type=None, sub_type=None, unsent=False, field_name="", name_style_conversion=False):
+        # sugar syntax for adding property detail
+        snake_to_camel = lambda fn: "".join([n if i == 0 else n.capitalize() for i, n in enumerate(fn.split("_"))])
+        _field_name = field_name if (field_name and not name_style_conversion) else snake_to_camel(name)
+        self._property_details.append(PropertyDetail(name, field_type, sub_type, unsent, _field_name))
+
     @classmethod
     def _get_property_names(cls, instance):
         properties = inspect.getmembers(instance, lambda m: not (inspect.isbuiltin(m) or inspect.isroutine(m)))
@@ -19,6 +26,10 @@ class kintoneStructure(object):
         names = [p[0] for p in public_properties]
 
         return names
+
+    @classmethod
+    def deserialize(cls, json_body):
+        return cls._deserialize(json_body, lambda f: (f, ""))
 
     @classmethod
     def _deserialize(cls, json_body, get_value_and_type):
@@ -108,6 +119,9 @@ class kintoneStructure(object):
                 value = cls.__map(value, lambda v: deserialize(v))
 
         return value
+
+    def serialize(self):
+        return self._serialize(lambda name, value, pd: (name, value))
 
     def _serialize(self, convert_to_key_and_value, ignore_missing=False):
         """

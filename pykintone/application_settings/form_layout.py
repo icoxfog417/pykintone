@@ -50,8 +50,8 @@ class LayoutField(ps.kintoneStructure):
         self.label = ""
         self.element_id = ""
         self.size = LayoutFieldSize()
-        self._property_details.append(ps.PropertyDetail("field_type", field_name="type"))
-        self._property_details.append(ps.PropertyDetail("element_id", field_name="elementId"))
+        self._pd("field_type", field_name="type")
+        self._pd("element_id", name_style_conversion=True)
 
     @classmethod
     def create(cls, field_or_field_type, code="", width=0, height=0, inner_height=0):
@@ -84,7 +84,7 @@ class LayoutFieldSize(ps.kintoneStructure):
         self.width = 0
         self.height = 0
         self.inner_height = 0
-        self._property_details.append(ps.PropertyDetail("inner_height", field_name="innerHeight"))
+        self._pd("inner_height", name_style_conversion=True)
 
     def serialize(self):
         return self._serialize(lambda name, value, pd: (name, value), ignore_missing=True)

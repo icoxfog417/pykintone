@@ -72,10 +72,10 @@ class View(ps.kintoneStructure):
         self.sort = ""
         self.index = 0
 
-        self._property_details.append(ps.PropertyDetail("view_id", field_name="id"))
-        self._property_details.append(ps.PropertyDetail("view_type", field_name="type"))
-        self._property_details.append(ps.PropertyDetail("builtin_type", field_name="builtinType"))
-        self._property_details.append(ps.PropertyDetail("filter_cond", field_name="filterCond"))
+        self._pd("view_id", field_name="id")
+        self._pd("view_type", field_name="type")
+        self._pd("builtin_type", name_style_conversion=True)
+        self._pd("filter_cond", name_style_conversion=True)
 
     @classmethod
     def create(cls, name, fields, view_type="", builtin_type="", filter_cond="", sort="", index=-1):
@@ -89,13 +89,6 @@ class View(ps.kintoneStructure):
         v.sort = sort
         v.index = index if index > -1 else v.index
         return v
-
-    def serialize(self):
-        return self._serialize(lambda name, value, pd: (name, value))
-
-    @classmethod
-    def deserialize(cls, json_body):
-        return cls._deserialize(json_body, lambda f: (f, ""))
 
     def __str__(self):
         return "{0}: {1}".format(self.view_id, self.name)
