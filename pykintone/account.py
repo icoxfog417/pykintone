@@ -37,6 +37,9 @@ class Account(object):
 
         return header
 
+    def kintone(self):
+        return kintoneService(self)
+
     @classmethod
     def load(cls, path):
         apps = None
@@ -114,23 +117,38 @@ class kintoneService(object):
                 self.__apps.append(_a)
                 return _a
 
+    def user_api(self, requests_options=()):
+        from collections import namedtuple
+        from pykintone.user_api.export import Export
+        UserAPI = namedtuple("UserAPI", ["for_exporting"])
+
+        e = Export(self.account, requests_options)
+        api = UserAPI(e)
+        return api
+
     @classmethod
     def value_to_date(cls, value):
-        return datetime.strptime(value, cls.DATE_FORMAT)
+        return value if not value else datetime.strptime(value, cls.DATE_FORMAT)
 
     @classmethod
     def value_to_time(cls, value):
-        return datetime.strptime(value, cls.TIME_FORMAT)
+        return value if not value else datetime.strptime(value, cls.TIME_FORMAT)
 
     @classmethod
     def value_to_datetime(cls, value):
-        d = datetime.strptime(value, cls.DATETIME_FORMAT)
-        return cls._to_local(d)
+        if value:
+            d = datetime.strptime(value, cls.DATETIME_FORMAT)
+            return cls._to_local(d)
+        else:
+            return None
 
     @classmethod
     def value_to_timestamp(cls, value):
-        d = datetime.strptime(value, cls.TIMESTAMP_FORMAT)
-        return cls._to_local(d)
+        if value:
+            d = datetime.strptime(value, cls.TIMESTAMP_FORMAT)
+            return cls._to_local(d)
+        else:
+            return None
 
     @classmethod
     def _to_local(cls, d):
@@ -152,7 +170,3 @@ class kintoneService(object):
         utc = local.astimezone(pytz.utc)
         value = utc.strftime(cls.DATETIME_FORMAT)
         return value
-
-    @classmethod
-    def download_file(cls, account):
-        pass
