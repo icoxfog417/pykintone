@@ -13,7 +13,7 @@ class Administrator(BaseAdministrationAPI):
     def __get_admin(self):
         return self
 
-    def get_application(self, app_id=""):
+    def get_app_info(self, app_id=""):
         url = "https://{0}.cybozu.com/k/v1/app.json".format(self.account.domain)
 
         params = {
@@ -21,11 +21,27 @@ class Administrator(BaseAdministrationAPI):
         }
 
         r = self._request("GET", url, params_or_data=params, use_api_token=False)
-        return sr.GetApplicationSettingsResult(r)
+        return sr.GetApplicationInformationResult(r)
 
-    def select_applications(self, app_ids=(), codes=(), name="", spaceIds=(), limit=-1, offset=-1):
-        # todo: implements select applications
-        pass
+    def select_app_info(self, app_ids=(), codes=(), name="", space_ids=(), limit=-1, offset=-1):
+        url = "https://{0}.cybozu.com/k/v1/apps.json".format(self.account.domain)
+
+        params = {}
+        if len(app_ids) > 0:
+            params["ids"] = app_ids
+        if len(codes) > 0:
+            params["codes"] = codes
+        if name:
+            params["name"] = name
+        if len(space_ids) > 0:
+            params["spaceIds"] = space_ids
+        if limit > 0:
+            params["limit"] = limit
+        if offset >= 0:
+            params["offset"] = offset
+
+        r = self._request("GET", url, params_or_data=params, use_api_token=False)
+        return sr.GetApplicationInformationsResult(r)
 
     def create_application(self, name, space_id="", thread_id=""):
         # this api is preview
@@ -136,10 +152,10 @@ class Administrator(BaseAdministrationAPI):
         return ViewAPI(self.account, self.api_token, self.requests_options, self.app_id)
 
 
-class ApplicationSettings(ps.kintoneStructure):
+class ApplicationInformation(ps.kintoneStructure):
 
     def __init__(self):
-        super(ApplicationSettings, self).__init__()
+        super(ApplicationInformation, self).__init__()
         self.app_id = ""
         # self.code = "" # nothing is set
         self.name = ""
