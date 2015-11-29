@@ -2,18 +2,32 @@ from collections import namedtuple
 from pykintone.result import Result
 
 
-class GetApplicationSettingsResult(Result):
+class GetApplicationInformationResult(Result):
 
     def __init__(self, response):
-        super(GetApplicationSettingsResult, self).__init__(response)
+        super(GetApplicationInformationResult, self).__init__(response)
         self.raw = {}
-        self.settings = None
+        self.info = None
         if self.ok:
             serialized = response.json()
             if "appId" in serialized:
                 self.raw = serialized
-                from pykintone.application_settings.administrator import ApplicationSettings
-                self.settings = ApplicationSettings.deserialize(self.raw)
+                from pykintone.application_settings.administrator import ApplicationInformation
+                self.info = ApplicationInformation.deserialize(self.raw)
+
+
+class GetApplicationInformationsResult(Result):
+
+    def __init__(self, response):
+        super(GetApplicationInformationsResult, self).__init__(response)
+        self.raw = {}
+        self.infos = None
+        if self.ok:
+            serialized = response.json()
+            if "apps" in serialized:
+                self.raw = serialized["apps"]
+                from pykintone.application_settings.administrator import ApplicationInformation
+                self.infos = [ApplicationInformation.deserialize(a) for a in self.raw]
 
 
 class GetGeneralSettingsResult(Result):
