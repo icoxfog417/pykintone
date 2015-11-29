@@ -118,12 +118,8 @@ class kintoneService(object):
                 return _a
 
     def user_api(self, requests_options=()):
-        from collections import namedtuple
-        from pykintone.user_api.export import Export
-        UserAPI = namedtuple("UserAPI", ["for_exporting"])
-
-        e = Export(self.account, requests_options)
-        api = UserAPI(e)
+        from pykintone.user_api import UserAPI
+        api = UserAPI(self.account, requests_options)
         return api
 
     @classmethod
