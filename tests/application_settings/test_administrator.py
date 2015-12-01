@@ -41,3 +41,11 @@ class TestGeneral(unittest.TestCase):
             # create view
             view = View.create("mylist", ["title", "description"])
             admin.view().update(view)
+
+    def test_copy_application(self):
+        kintone = pykintone.load(envs.FILE_PATH)
+        app = kintone.app()
+
+        with kintone.administration().as_test_mode() as admin:
+            created = admin.copy_application("copied application", app.app_id)
+            self.assertTrue(created.ok)
