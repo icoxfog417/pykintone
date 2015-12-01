@@ -117,6 +117,10 @@ class kintoneService(object):
                 self.__apps.append(_a)
                 return _a
 
+    def administration(self, requests_options=()):
+        from pykintone.application_settings.administrator import Administrator
+        return Administrator(self.account, requests_options=requests_options)
+
     def user_api(self, requests_options=()):
         from pykintone.user_api import UserAPI
         api = UserAPI(self.account, requests_options)
@@ -166,3 +170,23 @@ class kintoneService(object):
         utc = local.astimezone(pytz.utc)
         value = utc.strftime(cls.DATETIME_FORMAT)
         return value
+
+    @classmethod
+    def get_default_field_list(cls, as_str=False):
+        from pykintone.structure import FieldType
+        fields = [
+            FieldType.CATEGORY,
+            FieldType.STATUS,
+            FieldType.RECORD_NUMBER,
+            FieldType.CREATED_TIME,
+            FieldType.CREATOR,
+            FieldType.STATUS_ASSIGNEE,
+            FieldType.UPDATED_TIME,
+            FieldType.MODIFIER
+        ]
+        if as_str:
+            str_fields = [f.value for f in fields]
+            return str_fields
+        else:
+            return fields
+

@@ -35,10 +35,13 @@ class GetGeneralSettingsResult(Result):
     def __init__(self, response):
         super(GetGeneralSettingsResult, self).__init__(response)
         self.raw = {}
+        self.revision = -1
         self.settings = None
         if self.ok:
             serialized = response.json()
             if "revision" in serialized:
+                self.revision = int(serialized["revision"])
+                serialized.pop("revision")
                 self.raw = serialized
                 from pykintone.application_settings.general_settings import GeneralSettings
                 self.settings = GeneralSettings.deserialize(self.raw)
@@ -93,16 +96,16 @@ class GetFormResult(Result):
 
     def __init__(self, response):
         super(GetFormResult, self).__init__(response)
-        self.properties = {}
+        self.raw = {}
         self.revision = -1
         self.fields = []
         if self.ok:
             serialized = response.json()
             if "properties" in serialized:
                 self.revision = int(serialized["revision"])
-                self.properties = serialized["properties"]
+                self.raw = serialized["properties"]
                 from pykintone.application_settings.form import FormAPI
-                self.fields = FormAPI.load_properties(self.properties)
+                self.fields = FormAPI.load_properties(self.raw)
 
 
 class GetLayoutResult(Result):

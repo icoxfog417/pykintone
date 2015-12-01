@@ -61,6 +61,69 @@ class Administrator(BaseAdministrationAPI):
         self.app_id = cr.app_id
         return cr
 
+    def copy_application(self, app_name, original_app_id, space_id="", thread_id=""):
+        general_settings = self.general_settings().get(original_app_id)
+        form_fields = self.form().get(original_app_id)
+        form_layout = self.form().get_layout(original_app_id)
+        views = self.view().get(original_app_id)
+
+        if general_settings.ok and form_fields.ok and form_layout.ok and views.ok:
+            # begin create application
+            created = self.create_application(app_name, space_id, thread_id)
+            app_id = created.app_id
+
+            def pack(j, wrap_key="", replaces=()):
+                p = {}
+                if isinstance(j, dict):
+                    for k in j:
+                        if len(replaces) > 0 and k in replaces:
+                            p[k] = replaces[k]
+                        else:
+                            p[k] = j[k]
+                else:
+                    p = j
+                if wrap_key:
+                    p = {wrap_key: p}
+                p["app"] = app_id
+                return p
+
+            def select_fields(j):
+                from pykintone.account import kintoneService
+                p = {}
+                ignores = kintoneService.get_default_field_list(as_str=True)
+                for k in j:
+                    if "enabled" in j[k] and not j[k]["enabled"]:
+                        continue
+                    elif "type" in j[k] and j[k]["type"] in ignores:
+                        continue
+                    else:
+                        p[k] = j[k]
+                return p
+
+            g_update = self.general_settings().update(pack(general_settings.raw, replaces={"name": app_name, "icon": None}))
+            f_update = self.form().add(pack(select_fields(form_fields.raw), wrap_key="properties"))
+            fl_update = self.form().update_layout(pack(form_layout.raw, "layout"))
+            v_update = self.view().update(pack(views.raw, "views"))
+
+            if g_update.ok and f_update.ok and fl_update.ok and v_update.ok:
+                self._cached_changes = True
+                return created
+            else:
+                failed_msg = []
+                for n, r in [
+                    ("General Settings", g_update),
+                    ("Form Update", f_update),
+                    ("Form Layout", fl_update),
+                    ("View Update", v_update)]:
+
+                    if not r.ok:
+                        failed_msg += [n + ":" + r.error.message]
+                raise Exception(
+                    "Error is occurred when creating the the application. \n{0}".format("\n".join(failed_msg))
+                )
+        else:
+            raise Exception("Error is occurred when getting the application settings.")
+
     def commit_settings(self, app_id, revision=-1):
         r = self.__deploy_application(app_id, revision)
         return r
