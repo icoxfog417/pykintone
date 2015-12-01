@@ -21,6 +21,7 @@ class TestForm(unittest.TestCase):
         admin = Administrator(account)
         rollbacked = admin.rollback_settings(cls.TEST_APP.app_id)
         cls.TEST_APP = None
+        print("You have to delete the application from the application administration view.")
 
     def test_get_form(self):
         app = pykintone.load(envs.FILE_PATH).app()

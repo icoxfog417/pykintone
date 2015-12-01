@@ -117,7 +117,7 @@ class kintoneService(object):
                 self.__apps.append(_a)
                 return _a
 
-    def administration(self, requests_options=()):
+    def administration(self,requests_options=()):
         from pykintone.application_settings.administrator import Administrator
         return Administrator(self.account, requests_options=requests_options)
 

@@ -84,9 +84,9 @@ from pykintone.application_settings.administrator import Administrator
 import pykintone.application_settings.form_field as ff
 from pykintone.application_settings.view import View
 
-account = pykintone.load("path_to_account_setting").account
+kintone = pykintone.load("path_to_account_setting")
 
-with Administrator(account) as admin:
+with kintone.administration().transaction() as admin:
     # create application
     created = admin.create_application("my_application")
 

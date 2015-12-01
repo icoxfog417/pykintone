@@ -13,6 +13,10 @@ class Administrator(BaseAdministrationAPI):
     def __get_admin(self):
         return self
 
+    def transaction(self):
+        self._cached_changes = True
+        return self
+
     def get_app_info(self, app_id=""):
         url = "https://{0}.cybozu.com/k/v1/app.json".format(self.account.domain)
 

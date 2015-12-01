@@ -26,7 +26,7 @@ class BaseAdministrationAPI(BaseAPI):
     def __exit__(self, exc_type, exc_val, exc_tb):
         if self._cached_changes and not self.app_id:
             raise Exception("There are some changes to be committed, but no application id.")
-        elif not self._cached_changes or not self.app_id:
+        elif not (self._cached_changes and self.app_id):
             return None
 
         admin = self.__get_admin()

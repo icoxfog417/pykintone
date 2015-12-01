@@ -25,6 +25,7 @@ class TestView(unittest.TestCase):
         admin = Administrator(account)
         rollbacked = admin.rollback_settings(cls.TEST_APP.app_id)
         cls.TEST_APP = None
+        print("You have to delete the application from the application administration view.")
 
     def test_get_view(self):
         app = pykintone.load(envs.FILE_PATH).app()

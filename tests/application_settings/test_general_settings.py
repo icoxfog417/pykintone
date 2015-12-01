@@ -6,6 +6,10 @@ from pykintone.application_settings.administrator import Administrator
 
 class TestGeneralSettings(unittest.TestCase):
 
+    @classmethod
+    def tearDownClass(cls):
+        print("You have to delete the application from the application administration view.")
+
     def test_get_general_settings(self):
         app = pykintone.load(envs.FILE_PATH).app()
         s = app.administration().general_settings().get().settings

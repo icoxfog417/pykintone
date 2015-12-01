@@ -8,6 +8,10 @@ from pykintone.application_settings.view import View
 
 class TestGeneral(unittest.TestCase):
 
+    @classmethod
+    def tearDownClass(cls):
+        print("You have to delete the application from the application administration view.")
+
     def test_get_application_information(self):
         app = pykintone.load(envs.FILE_PATH).app()
         ai = app.administration().get_app_info().info
@@ -19,17 +23,17 @@ class TestGeneral(unittest.TestCase):
         self.assertTrue(ai)
 
     def test_create_rollback_application(self):
-        account = pykintone.load(envs.FILE_PATH).account
+        kintone = pykintone.load(envs.FILE_PATH)
 
-        with Administrator(account).as_test_mode() as admin:
+        with kintone.administration().transaction().as_test_mode() as admin:
             created = admin.create_application("test_create_application")
             admin.revision = created.revision
             self.assertTrue(created.ok)
 
     def test_create_application(self):
-        account = pykintone.load(envs.FILE_PATH).account
+        kintone = pykintone.load(envs.FILE_PATH)
 
-        with Administrator(account).as_test_mode() as admin:
+        with kintone.administration().transaction() as admin:
             # create application
             created = admin.create_application("my_application")
 
@@ -46,6 +50,6 @@ class TestGeneral(unittest.TestCase):
         kintone = pykintone.load(envs.FILE_PATH)
         app = kintone.app()
 
-        with kintone.administration().as_test_mode() as admin:
+        with kintone.administration().transaction().as_test_mode() as admin:
             created = admin.copy_application("copied application", app.app_id)
             self.assertTrue(created.ok)
