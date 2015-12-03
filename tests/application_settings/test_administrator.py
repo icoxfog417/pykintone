@@ -22,6 +22,10 @@ class TestGeneral(unittest.TestCase):
         ai = app.administration().select_app_info(name="pykintone").infos
         self.assertTrue(ai)
 
+        app_id = ai[0].app_id
+        ai = app.administration().select_app_info(app_ids=[app_id]).infos
+        self.assertTrue(ai)
+
     def test_create_rollback_application(self):
         kintone = pykintone.load(envs.FILE_PATH)
 

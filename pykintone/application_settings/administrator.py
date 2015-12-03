@@ -29,16 +29,20 @@ class Administrator(BaseAdministrationAPI):
 
     def select_app_info(self, app_ids=(), codes=(), name="", space_ids=(), limit=-1, offset=-1):
         url = "https://{0}.cybozu.com/k/v1/apps.json".format(self.account.domain)
-
         params = {}
+
+        def set_array_parameter(name, array):
+            for i, a in enumerate(array):
+                params[name + "[{0}]".format(i)] = a
+
         if len(app_ids) > 0:
-            params["ids"] = app_ids
+            set_array_parameter("ids", app_ids)
         if len(codes) > 0:
-            params["codes"] = codes
+            set_array_parameter("codes", codes)
         if name:
             params["name"] = name
         if len(space_ids) > 0:
-            params["spaceIds"] = space_ids
+            set_array_parameter("spaceIds", space_ids)
         if limit > 0:
             params["limit"] = limit
         if offset >= 0:

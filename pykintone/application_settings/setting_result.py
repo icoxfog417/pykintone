@@ -21,7 +21,7 @@ class GetApplicationInformationsResult(Result):
     def __init__(self, response):
         super(GetApplicationInformationsResult, self).__init__(response)
         self.raw = {}
-        self.infos = None
+        self.infos = []
         if self.ok:
             serialized = response.json()
             if "apps" in serialized:
@@ -36,7 +36,7 @@ class GetGeneralSettingsResult(Result):
         super(GetGeneralSettingsResult, self).__init__(response)
         self.raw = {}
         self.revision = -1
-        self.settings = None
+        self.settings = []
         if self.ok:
             serialized = response.json()
             if "revision" in serialized:
