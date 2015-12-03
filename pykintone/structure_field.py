@@ -65,12 +65,13 @@ class File(object):
         return file
 
     @classmethod
-    def upload(cls, file_or_path, api):
+    def upload(cls, file_or_path, api, file_name=""):
         from os.path import basename
         url = cls.API_ROOT.format(api.account.domain)
 
         def _upload(file):
-            n = basename(file.name)
+            get_name = lambda f: "" if not hasattr(f, name) else basename(file.name)
+            n = file_name if file_name else get_name(file_or_path)
             f = {"file": (
                 n,
                 file
