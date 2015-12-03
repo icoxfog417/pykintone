@@ -103,9 +103,9 @@ class kintoneService(object):
     def __len__(self):
         return len(self.__apps)
 
-    def app(self, app_id=-1, api_token="", app_name=""):
+    def app(self, app_id="", api_token="", app_name=""):
         from pykintone.application import Application
-        if app_id < 0:
+        if not app_id:
             return self.__apps[0]
         else:
             existed = [a for a in self.__apps if a.app_id == app_id]
