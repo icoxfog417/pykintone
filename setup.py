@@ -11,12 +11,12 @@ setup(
         'PyYAML',
         'requests'
     ],
-    version='0.3.5',
+    version='0.3.6',
     description='Python library to access kintone',
     author='icoxfog417',
     author_email='icoxfog417@yahoo.co.jp',
     url='https://github.com/icoxfog417/pykintone',
-    download_url='https://github.com/icoxfog417/pykintone/tarball/0.3.5',
+    download_url='https://github.com/icoxfog417/pykintone/tarball/0.3.6',
     keywords=['kintone'],
     classifiers=[],
 )

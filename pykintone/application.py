@@ -34,7 +34,7 @@ class Application(BaseAPI):
     def select(self, query="", fields=()):
         url = self.__multiple()
 
-        headers = self.account.to_header()
+        headers = self.account.to_header(self.api_token)
         headers["X-HTTP-Method-Override"] = "GET"  # use post to get
         data = {
             "app": self.app_id,
