@@ -141,6 +141,24 @@ class TestApp(unittest.TestCase):
         result = app.create(record)
         self.assertFalse(result.ok)
 
+    def test_process(self):
+        app = pykintone.load(envs.FILE_PATH).app()
+        record = {
+            "my_key": {
+                "value": "test_process"
+            }
+        }
+
+        for c in ("single", "multiple"):
+            created_id = app.create(record).record_id
+            created = app.get(created_id).record
+            if c == "single":
+                proceeded = app.proceed(created, "処理開始")
+            else:
+                proceeded = app.batch_proceed([created], "処理開始")
+        app.delete(created_id)  # delete record
+        self.assertTrue(proceeded.ok)
+
     def test_options(self):
         app = pykintone.load(envs.FILE_PATH).app()
         app.requests_options = {

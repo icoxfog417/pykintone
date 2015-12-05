@@ -191,6 +191,51 @@ class Application(BaseAPI):
 
         return r
 
+    def __to_proceed_format(self, record_or_model, action, assignee=""):
+        from enum import Enum
+        record_id = -1
+        revision = -1
+        if self.__get_model_type(record_or_model):
+            record_id = record_or_model.record_id
+            revision = record_or_model.revision
+        else:
+            record_id = int(record_or_model["$id"]["value"])
+            revision = int(record_or_model["$revision"]["value"])
+
+        action = action
+        if isinstance(action, Enum):
+            action = action.value
+
+        data = {
+            "id": record_id,
+            "action": action,
+            "assignee": assignee
+        }
+
+        if revision > -1:
+            data["revision"] = revision
+
+        return data
+
+    def proceed(self, record_or_model, action, assignee=""):
+        url = self.API_ROOT.format(self.account.domain, "record/status.json")
+        data = self.__to_proceed_format(record_or_model, action, assignee)
+        data["app"] = self.app_id
+        resp = self._request("PUT", url, params_or_data=data)
+        r = mr.UpdateResult(resp)
+        return r
+
+    def batch_proceed(self, records_or_modesls, action, assignee=""):
+        url = self.API_ROOT.format(self.account.domain, "records/status.json")
+        data = [self.__to_proceed_format(rm, action, assignee) for rm in records_or_modesls]
+        data = {
+            "app": self.app_id,
+            "records": data
+        }
+        resp = self._request("PUT", url, params_or_data=data)
+        r = mr.BatchUpdateResult(resp)
+        return r
+
     def administration(self):
         from pykintone.application_settings.administrator import Administrator
         return Administrator(self.account, self.api_token, self.requests_options, self.app_id)
