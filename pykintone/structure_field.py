@@ -1,3 +1,6 @@
+from os.path import basename
+
+
 class UserSelect(object):
 
     def __init__(self, code="", name=""):
@@ -66,16 +69,12 @@ class File(object):
 
     @classmethod
     def upload(cls, file_or_path, api, file_name=""):
-        from os.path import basename
         url = cls.API_ROOT.format(api.account.domain)
 
         def _upload(file):
             get_name = lambda f: "" if not hasattr(f, name) else basename(file.name)
             n = file_name if file_name else get_name(file_or_path)
-            f = {"file": (
-                n,
-                file
-            )}
+            f = {"file": file}
             r = api._request("FILE", url, params_or_data=f)
             return n, r
 
