@@ -151,7 +151,7 @@ domain: xxx
 apps:
     test:
         id: 1
-        api_token: xxxx
+        token: xxxx
 ```
 
 ## Test
