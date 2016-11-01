@@ -146,7 +146,8 @@ class kintoneStructure(object):
                 continue
             else:
                 key, value = convert_to_key_and_value(field_name, value, pd)
-                serialized[key] = value
+                if key:
+                    serialized[key] = value
 
         return serialized
 
@@ -177,9 +178,13 @@ class kintoneStructure(object):
             if property_detail and property_detail.sub_type:
                 table = []
                 for r in value:
-                    table.append({
-                        "value": r.to_record()
-                    })
+                    values = r.to_record()
+                    row = {}
+                    if "id" in values:
+                        _id = values.pop("id")
+                        row["id"] = _id["value"]
+                    row["value"] = values
+                    table.append(row)
                 value = table
         elif field_type == FieldType.FILE:
             value = self.__map(value, lambda v: v.serialize(), to_list=True)

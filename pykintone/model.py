@@ -23,7 +23,9 @@ class kintoneModel(ps.kintoneStructure):
             }
             if field_name in ["$id", "$revision"]:
                 if value > -1:
-                    key = field_name[1:] # escape $
+                    key = field_name[1:]  # escape $
+                else:
+                    key = None
 
             return key, formatted
 
