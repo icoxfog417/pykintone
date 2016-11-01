@@ -52,6 +52,8 @@ Of course you can use every basic operation.
 
 ## File Field
 
+(You have to prepare the kintone Application that has `my_files` field as below.)
+
 ```python
 import pykintone
 from pykintone import model
@@ -62,18 +64,18 @@ class MyFolder(model.kintoneModel):
 
     def __init__(self):
         super(MyFolder, self).__init__()
-        self.files = [sf.File()]
+        self.my_files = [sf.File()]
 
 
 app = pykintone.load("path_to_account_setting").app()
-myfiles = ["note.txt", "image.png"]
+my_files = ["note.txt", "image.png"]
 
 folder = MyFolder()
-folder.files = [sf.File.upload(f, app) for f in myfiles]
+folder.my_files = [sf.File.upload(f, app) for f in my_files]
 
 result = app.create(folder)
 record = app.get(result.record_id).model(MyFolder)
-files = [f.download(app) for f in record.files]
+files = [f.download(app) for f in record.my_files]
 ```
 
 ## Application Administration
