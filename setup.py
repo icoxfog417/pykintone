@@ -9,14 +9,16 @@ setup(
     ],
     install_requires=[
         'PyYAML',
-        'requests'
+        'requests',
+        'pytz',
+        'tzlocal'
     ],
-    version='0.3.6',
+    version='0.3.7',
     description='Python library to access kintone',
     author='icoxfog417',
     author_email='icoxfog417@yahoo.co.jp',
     url='https://github.com/icoxfog417/pykintone',
-    download_url='https://github.com/icoxfog417/pykintone/tarball/0.3.6',
+    download_url='https://github.com/icoxfog417/pykintone/tarball/0.3.7',
     keywords=['kintone'],
     classifiers=[],
 )
