@@ -78,6 +78,33 @@ record = app.get(result.record_id).model(MyFolder)
 files = [f.download(app) for f in record.my_files]
 ```
 
+
+## Record Comment
+
+```python
+import pykintone
+from pykintone import model
+
+
+class Report(model.kintoneModel):
+
+    def __init__(self, title="", detail=""):
+        super(Report, self).__init__()
+        self.title = title
+        self.detail = detail
+
+
+app = pykintone.load("path_to_account_setting").app()
+
+# create record
+report = Report(title="about today", detail="I used pykintone.")
+created_id = app.create(report).record_id
+
+# create comment
+app.comment(created_id).create("Good Job!")
+
+```
+
 ## Application Administration
 
 ```python

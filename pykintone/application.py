@@ -240,6 +240,10 @@ class Application(BaseAPI):
         from pykintone.application_settings.administrator import Administrator
         return Administrator(self.account, self.api_token, self.requests_options, self.app_id)
 
+    def comment(self, record_id):
+        from pykintone.comment_api import CommentAPI
+        return CommentAPI(self.account, self.app_id, record_id, self.api_token, self.requests_options)
+
     def __str__(self):
         info = str(self.account)
         info += "\napp:\n"

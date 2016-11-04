@@ -13,12 +13,12 @@ setup(
         'pytz',
         'tzlocal'
     ],
-    version='0.3.8',
+    version='0.3.9',
     description='Python library to access kintone',
     author='icoxfog417',
     author_email='icoxfog417@yahoo.co.jp',
     url='https://github.com/icoxfog417/pykintone',
-    download_url='https://github.com/icoxfog417/pykintone/tarball/0.3.8',
+    download_url='https://github.com/icoxfog417/pykintone/tarball/0.3.9',
     keywords=['kintone'],
     classifiers=[],
 )
