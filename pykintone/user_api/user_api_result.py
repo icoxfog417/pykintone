@@ -48,4 +48,4 @@ class GetUserGroupsResult(Result):
             if "groups" in serialized:
                 self.raw = serialized["groups"]
                 from pykintone.user_api.group import Group
-                self.Groups = [Group.deserialize(u) for u in self.raw]
+                self.groups = [Group.deserialize(u) for u in self.raw]
