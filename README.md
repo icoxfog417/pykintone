@@ -202,13 +202,8 @@ To run tests, follow these steps:
         testApp:
             id: <id of the application>
     ```
-- Set the user's language as "Japanese".
-    1. Open "Account Settings" page.
-    2. In "Basic Profile" configuration group, set "Language" as "日本語" (=Japanese).
 - Run tests.
     ```bash
     cd /path/to/pykintone
     python3 -m unittest
     ```
-
-Note: Above language setting is a workaround for bug #27. You should be able to test if the bug has been fixed.
