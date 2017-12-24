@@ -27,7 +27,7 @@ class TestExport(unittest.TestCase):
                 tested = True
                 for ot in ots:
                     self.assertTrue(ot.organization.code)
-                    self.assertTrue(ot.title.code)
+                    self.assertTrue(ot.title is None or ot.title.code)
 
         if not tested:
             print("Caution, organization and title deserialization is not checked. Please make user who belongs to some organization.")

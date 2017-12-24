@@ -31,7 +31,9 @@ class UserOrganizationTitlesResult(Result):
                 OrganizationTitle = namedtuple("OrganizationTitle", ["organization", "title"])
                 for ot in self.raw:
                     o = Organization.deserialize(ot["organization"])
-                    t = Title.deserialize(ot["title"])
+                    t = None
+                    if ot["title"] is not None:
+                        t = Title.deserialize(ot["title"])
                     self.organization_titles.append(OrganizationTitle(o, t))
 
 
