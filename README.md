@@ -185,4 +185,30 @@ apps:
 
 ## Test
 
-You have to create test application on kintone, and you can use `tests/pykintoneTest.zip` (application template) to do it.
+To run tests, follow these steps:
+
+- Create a test application on your kintone, using tests/pykintoneTest.zip template.
+    1. Open "kintone Administration" page from the setting icon.
+    2. Open "App Template" page.
+    3. Click "Import" button and select tests/pykintoneTest.zip file.
+    4. Create an application using the template.
+- Write your account.yaml at the root directory of pykintone.
+    ```yaml
+    domain: <your-domain without .cybozu.com>
+    login:
+        id: <user name>
+        password: <user password>
+    apps:
+        testApp:
+            id: <id of the application>
+    ```
+- Set the user's language as "Japanese".
+    1. Open "Account Settings" page.
+    2. In "Basic Profile" configuration group, set "Language" as "日本語" (=Japanese).
+- Run tests.
+    ```bash
+    cd /path/to/pykintone
+    python3 -m unittest
+    ```
+
+Note: Above language setting is a workaround for bug #27. You should be able to test if the bug has been fixed.
