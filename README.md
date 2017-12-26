@@ -185,4 +185,25 @@ apps:
 
 ## Test
 
-You have to create test application on kintone, and you can use `tests/pykintoneTest.zip` (application template) to do it.
+To run tests, follow these steps:
+
+- Create a test application on your kintone, using tests/pykintoneTest.zip template.
+    1. Open "kintone Administration" page from the setting icon.
+    2. Open "App Template" page.
+    3. Click "Import" button and select tests/pykintoneTest.zip file.
+    4. Create an application using the template.
+- Write your account.yaml at the root directory of pykintone.
+    ```yaml
+    domain: <your-domain without .cybozu.com>
+    login:
+        id: <user name>
+        password: <user password>
+    apps:
+        testApp:
+            id: <id of the application>
+    ```
+- Run tests.
+    ```bash
+    cd /path/to/pykintone
+    python3 -m unittest
+    ```

@@ -31,7 +31,9 @@ class UserOrganizationTitlesResult(Result):
                 OrganizationTitle = namedtuple("OrganizationTitle", ["organization", "title"])
                 for ot in self.raw:
                     o = Organization.deserialize(ot["organization"])
-                    t = Title.deserialize(ot["title"])
+                    t = None
+                    if ot["title"] is not None:
+                        t = Title.deserialize(ot["title"])
                     self.organization_titles.append(OrganizationTitle(o, t))
 
 
@@ -46,4 +48,4 @@ class GetUserGroupsResult(Result):
             if "groups" in serialized:
                 self.raw = serialized["groups"]
                 from pykintone.user_api.group import Group
-                self.Groups = [Group.deserialize(u) for u in self.raw]
+                self.groups = [Group.deserialize(u) for u in self.raw]
