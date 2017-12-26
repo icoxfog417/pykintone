@@ -131,10 +131,10 @@ class TestModel(unittest.TestCase):
         self.assertTrue(result.ok)
         app.delete([created])
 
-    def test_file(self):
+    def _test_file_upload(self, relative_path):
         import os
         app = pykintone.load(envs.FILE_PATH).app()
-        file_path = os.path.join(os.path.dirname(__file__), "./kintone.PNG")
+        file_path = os.path.join(os.path.dirname(__file__), relative_path)
 
         model = TestAppModel()
         model.my_key = "file_field_check"
@@ -147,3 +147,9 @@ class TestModel(unittest.TestCase):
         file = created.attachfile.download(app)
         self.assertTrue(file)
         app.delete([created])
+
+    def test_file(self):
+        self._test_file_upload("./kintone.PNG")
+
+    def test_file_no_extension(self):
+        self._test_file_upload("../LICENSE")
