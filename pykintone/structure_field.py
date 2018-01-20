@@ -71,20 +71,20 @@ class File(object):
     def upload(cls, file_or_path, api, file_name="", mime_type=""):
         url = cls.API_ROOT.format(api.account.domain)
 
-        def _upload(file):
+        def _upload(kfile):
             if file_name:
                 n = file_name
             else:
-                n = "" if not hasattr(file, "name") else basename(file.name)
+                n = "" if not hasattr(kfile, "name") else basename(kfile.name)
 
-            f = {"file": (n, file, mime_type) if mime_type else (n, file)}
+            f = {"file": (n, kfile, mime_type) if mime_type else (n, kfile)}
             r = api._request("FILE", url, params_or_data=f)
             return n, r
 
         resp = None
         if isinstance(file_or_path, str):
-            with open(file_or_path, "rb") as file:
-                name, resp = _upload(file)
+            with open(file_or_path, "rb") as f:
+                name, resp = _upload(f)
         else:
             name, resp = _upload(file_or_path)
 
@@ -93,5 +93,7 @@ class File(object):
             body = resp.json()
             if "fileKey" in body:
                 uploaded = File(name=name, file_key=body["fileKey"])
+        else:
+            print(resp.json())
 
         return uploaded

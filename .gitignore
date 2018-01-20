@@ -68,6 +68,6 @@ target/
 *.iws
 
 venv
-venv2
+.vscode
 account.yaml
 MANIFEST
