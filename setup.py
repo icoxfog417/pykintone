@@ -1,24 +1,24 @@
-from distutils.core import setup
+from setuptools import setup
+
 
 setup(
-    name='pykintone',
+    name="pykintone",
     packages=[
-        'pykintone',
-        'pykintone.application_settings',
-        'pykintone.user_api'
+        "pykintone",
+        "pykintone.application_settings",
+        "pykintone.user_api"
     ],
     install_requires=[
-        'PyYAML',
-        'requests',
-        'pytz',
-        'tzlocal'
+        "PyYAML",
+        "requests",
+        "pytz",
+        "tzlocal"
     ],
-    version='0.3.9',
-    description='Python library to access kintone',
-    author='icoxfog417',
-    author_email='icoxfog417@yahoo.co.jp',
-    url='https://github.com/icoxfog417/pykintone',
-    download_url='https://github.com/icoxfog417/pykintone/tarball/0.3.9',
-    keywords=['kintone'],
+    version="0.3.10",
+    description="Python library to access kintone",
+    author="icoxfog417",
+    author_email="icoxfog417@yahoo.co.jp",
+    url="https://github.com/icoxfog417/pykintone",
+    keywords=["kintone"],
     classifiers=[],
 )
